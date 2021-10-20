@@ -67,7 +67,7 @@ func parseDumpingCommand(db models.Database) (string, string) {
 
 // parseZippingCommand combine all commands for zipping dumped database
 func parseZippingCommand(db models.Database, outName string) string {
-	fmtTime := time.Now().Format("2006-01-02__15:04:05")
+	fmtTime := time.Now().Format("2006-Jan-02_Monday_15:04:05")
 	fName := "/" + fmtTime + ".zip"
 	zipName := helpers.Conf.BackupDBDir + db.DirName + fName
 	cmdSeries := []string{
