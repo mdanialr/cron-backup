@@ -14,7 +14,7 @@ func InitNzLog() {
 		log.Fatalln("Failed to create log full path recursively: ", err)
 	}
 
-	fl, err := os.OpenFile(Conf.LogDir+"cron_backup_log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0770)
+	fl, err := os.OpenFile(Conf.LogDir+"go-cron-backup--log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0770)
 	if err != nil {
 		log.Fatalln("Failed to open|create log file: ", err)
 	}
