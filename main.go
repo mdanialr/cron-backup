@@ -9,11 +9,12 @@ import (
 )
 
 func main() {
-	test := flag.Bool("test", false, "to test this app functioning properly")
+	isTest := flag.Bool("test", false, "to test this app functioning properly")
+	isDel := flag.Bool("d", false, "to delete all created dir after this test")
 	flag.Parse()
 
 	// Run backup only if there is no test flag
-	if !*test {
+	if !*isTest {
 		// Initialize Config & Logger
 		helpers.LoadConfigFromFile()
 		helpers.InitNzLog()
@@ -25,5 +26,5 @@ func main() {
 		helpers.NzLogInfo.Println("")
 		return
 	}
-	utils.RunTest()
+	utils.RunTest(*isDel)
 }
