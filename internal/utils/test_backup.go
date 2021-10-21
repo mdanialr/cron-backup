@@ -57,6 +57,7 @@ func parseBackupAPPCommand(app models.App) string {
 		"cd " + app.AppDir,
 		"zip -r -q " + zipName + " *",
 	}
+	fileToDelete.APPname = zipName
 
 	return strings.Join(cmdSeries, ";")
 }
@@ -119,6 +120,7 @@ func parseZippingCommand(db models.Database, outName string) string {
 		"cd /tmp",
 		"zip -q " + zipName + " " + outName,
 	}
+	fileToDelete.DBname = zipName
 
 	return strings.Join(cmdSeries, ";")
 }
