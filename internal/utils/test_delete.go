@@ -14,9 +14,9 @@ func testDelete(isDel bool) bool {
 	cLOG := make(chan bool)
 
 	if isDel {
-		go testDeleteDBnAPPnLOG(cAPP, testConf.BackupAppDir)
-		go testDeleteDBnAPPnLOG(cDB, testConf.BackupDBDir)
-		go testDeleteDBnAPPnLOG(cLOG, testConf.LogDir)
+		go testDeleteDir(cAPP, testConf.BackupAppDir)
+		go testDeleteDir(cDB, testConf.BackupDBDir)
+		go testDeleteDir(cLOG, testConf.LogDir)
 	} else {
 		go testDeleteZipFile(cAPP, fileToDelete.APPname)
 		go testDeleteZipFile(cDB, fileToDelete.DBname)
@@ -32,8 +32,8 @@ func testDelete(isDel bool) bool {
 	return isPass
 }
 
-// testDeleteDBnAPPnLOG delete dir and their contents recursively
-func testDeleteDBnAPPnLOG(c chan bool, dir string) {
+// testDeleteDir delete dir and their contents recursively
+func testDeleteDir(c chan bool, dir string) {
 	isPass := true
 
 	log.Println("[START] deleting test backup in", "'"+dir+"'")
@@ -51,13 +51,13 @@ func testDeleteDBnAPPnLOG(c chan bool, dir string) {
 func testDeleteZipFile(c chan bool, dir string) {
 	isPass := true
 
-	log.Println("[START] deleting test backup in", "'"+dir+"'")
+	log.Println("[START] deleting zip file:", "'"+dir+"'")
 	out, err := exec.Command("sh", "-c", "rm "+dir).CombinedOutput()
 	if err != nil {
 		log.Println(string(out))
 		isPass = false
 	}
-	log.Println("[DONE] deleting test backup in", "'"+dir+"'")
+	log.Println("[DONE] deleting zip file:", "'"+dir+"'")
 
 	c <- isPass
 }
