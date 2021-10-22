@@ -13,31 +13,36 @@ Little app to backup multiple databases and apps/folder/dir with zip archive wri
 ```sh
 $ git clone https://github.com/mdanialr/go-cron-backup.git
 ```
+> assuming that you are in the root path of the repo.
+2. Get dependencies.
+```sh
+$ go mod tidy
+```
 
-2. Create new config file. (assuming that you are in the root path of the repo)
+3. Create new config file.
 ```sh
 $ cp config.yaml.example config.yaml
 ```
 
-3. Fill in the config.yaml file as needed.
+4. Fill in the config.yaml file as needed.
 
-4. Build the project.
+5. Build the project.
 ```sh
 $ go build -o build/go-cron-backup main.go
 ```
 
-5. Run a test to check if the app is working properly.
+6. Run a test to check if the app is working properly.
 ```sh
 $ ./build/go-cron-backup -test -d
 ```
 > If there is no error message in terminal then go to next step.
 
-6. Run the app.
+7. Run the app.
 ```sh
 $ ./build/go-cron-backup
 ```
 
-7. (optional) Create cronjob to run this app.
+8. (optional) Create cronjob to run this app.
 > Example
 ```sh
 @daily cd /path/to/repo/go-cron-backup && ./build/go-cron-backup
@@ -48,6 +53,7 @@ $ ./build/go-cron-backup
 * `-test` argument is used to test the app. (*only delete the zip files that created by this test*)
 * `-d` argument is used to **delete all directories** in backup and log dir recursively including every files in that directories, so please be careful with this argument. (**_never use this argument when you have already run the app in production use, since this will delete all of your backuped files_**)
 * See log file to check if there are some errors or successfull backup. (in **go-cron-backup--log**)
+* Run the app when you are in the root path of the repo, otherwise you will see error regarding the config file is not found.
 
 # License
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE "LICENSE") file for details.
