@@ -48,3 +48,6 @@ $ ./build/go-cron-backup
 * `-test` argument is used to test the app. (*only delete the zip files that created by this test*)
 * `-d` argument is used to **delete all directories** in backup and log dir recursively including every files in that directories, so please be careful with this argument. (**_never use this argument when you have already run the app in production use, since this will delete all of your backuped files_**)
 * See log file to check if there are some errors or successfull backup. (in **go-cron-backup--log**)
+
+# License
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE "LICENSE") file for details.
