@@ -12,6 +12,7 @@ func main() {
 	isTest := flag.Bool("test", false, "to test this app functioning properly")
 	isDel := flag.Bool("d", false, "to delete all created dir after this test")
 	isExDB := flag.Bool("no-db", false, "to exclude database from this backup test")
+	isExAPP := flag.Bool("no-app", false, "to exclude app from this backup test")
 	flag.Parse()
 
 	// Run backup only if there is no test flag
@@ -27,5 +28,5 @@ func main() {
 		helpers.NzLogInfo.Println("")
 		return
 	}
-	utils.RunTest(*isDel, *isExDB)
+	utils.RunTest(*isDel, *isExDB, *isExAPP)
 }

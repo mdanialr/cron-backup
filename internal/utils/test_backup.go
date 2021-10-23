@@ -11,7 +11,7 @@ import (
 )
 
 // testBackup try to run backup and handle the goroutine
-func testBackup(isExDB bool) bool {
+func testBackup(isExDB bool, isExAPP bool) bool {
 	isPass := true
 
 	cAPP := make(chan bool)
@@ -19,19 +19,23 @@ func testBackup(isExDB bool) bool {
 	defer close(cAPP)
 	defer close(cDB)
 
-	go testBackupAPP(cAPP)
+	if isExAPP {
+		log.Println("[INFO] Excluding app from this test")
+	}
 	if isExDB {
 		log.Println("[INFO] Excluding database from this test")
+	}
+	if !isExAPP {
+		go testBackupAPP(cAPP)
+		if !<-cAPP {
+			isPass = false
+		}
 	}
 	if !isExDB {
 		go testBackupDB(cDB)
 		if !<-cDB {
 			isPass = false
 		}
-	}
-
-	if !<-cAPP {
-		isPass = false
 	}
 
 	return isPass
