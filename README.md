@@ -52,6 +52,8 @@ $ ./build/go-cron-backup
 * Run the app with `sudo` privileges, since many app are reside in dir like `/var/www/*` need `sudo` privileges to do something with that dir, and this is also a mandatory to backup Postgresql database since in the app **'sudo -u postgres ...'** is used to do the trick.
 * `-test` argument is used to test the app. (*only delete the zip files that created by this test*)
 * `-d` argument is used to **delete all directories** in backup and log dir recursively including every files in that directories, so please be careful with this argument. (**_never use this argument when you have already run the app in production use, since this will delete all of your backuped files_**)
+* `-no-app` argument is used to exclude app from this testing.
+* `-no-db` argument is used to exclude db from this testing.
 * See log file to check if there are some errors or successfull backup. (in **go-cron-backup--log**)
 * Run the app when you are in the root path of the repo, otherwise you will see error regarding the config file is not found.
 
