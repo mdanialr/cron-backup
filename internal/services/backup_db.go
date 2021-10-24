@@ -43,6 +43,15 @@ func backupDB(wg *sync.WaitGroup) {
 			}
 			helpers.NzLogInfo.Println("[DONE] zipping", "'"+db.Name+"'")
 
+			// delete dumped database from /tmp
+			helpers.NzLogInfo.Printf("[START] deleting leftover file '%v' from /tmp \n", outName)
+			delCmd := parseDelDumpedDBCommand(outName)
+			out, err = exec.Command("sh", "-c", delCmd).CombinedOutput()
+			if err != nil {
+				helpers.NzLogInfo.Println(string(out))
+			}
+			helpers.NzLogInfo.Println("[DONE] deleting leftover file", outName)
+
 			wg.Done()
 		}(wg, v.Database)
 	}
@@ -73,6 +82,15 @@ func parseZippingCommand(db models.Database, outName string) string {
 	cmdSeries := []string{
 		"cd /tmp",
 		"zip -q " + zipName + " " + outName,
+	}
+	return strings.Join(cmdSeries, ";")
+}
+
+// parseDelDumpedDBCommand combine all commands for deleting dumped database
+func parseDelDumpedDBCommand(db string) string {
+	cmdSeries := []string{
+		"cd /tmp",
+		"rm " + db,
 	}
 	return strings.Join(cmdSeries, ";")
 }
