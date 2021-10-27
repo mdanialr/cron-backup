@@ -49,6 +49,9 @@ func testDelete(isDel bool, isExDB bool, isExAPP bool) bool {
 			cLOG <- true
 		}()
 	}
+	if !isPass {
+		os.Exit(1)
+	}
 
 	return isPass
 }

@@ -35,6 +35,9 @@ func testBackup(isExDB bool, isExAPP bool) bool {
 			isPass = false
 		}
 	}
+	if !isPass {
+		os.Exit(1)
+	}
 
 	return isPass
 }

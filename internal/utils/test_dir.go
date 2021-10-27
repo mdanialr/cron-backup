@@ -29,6 +29,9 @@ func testCreateDir() bool {
 		log.Println("[ERROR] Failed to create backup db dir:", err)
 		isPass = false
 	}
+	if !isPass {
+		os.Exit(1)
+	}
 
 	return isPass
 }
