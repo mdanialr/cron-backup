@@ -16,8 +16,6 @@ func testBackup(isExDB bool, isExAPP bool) bool {
 
 	cAPP := make(chan bool)
 	cDB := make(chan bool)
-	defer close(cAPP)
-	defer close(cDB)
 
 	if isExAPP {
 		log.Println("[INFO] Excluding app from this test")

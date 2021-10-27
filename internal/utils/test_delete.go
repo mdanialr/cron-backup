@@ -14,9 +14,6 @@ func testDelete(isDel bool, isExDB bool, isExAPP bool) bool {
 	cAPP := make(chan bool)
 	cDB := make(chan bool)
 	cLOG := make(chan bool)
-	defer close(cAPP)
-	defer close(cDB)
-	defer close(cLOG)
 
 	if isDel {
 		if !isExAPP {
