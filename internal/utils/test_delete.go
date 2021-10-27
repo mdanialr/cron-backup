@@ -8,27 +8,49 @@ import (
 )
 
 // testDelete delete zip file that created by RunTest
-func testDelete(isDel bool) bool {
+func testDelete(isDel bool, isExDB bool, isExAPP bool) bool {
 	isPass := true
 
 	cAPP := make(chan bool)
 	cDB := make(chan bool)
 	cLOG := make(chan bool)
+	defer close(cAPP)
+	defer close(cDB)
+	defer close(cLOG)
 
 	if isDel {
-		go testDeleteDir(cAPP, testConf.BackupAppDir)
-		go testDeleteDir(cDB, testConf.BackupDBDir)
+		if !isExAPP {
+			go testDeleteDir(cAPP, testConf.BackupAppDir)
+			if !<-cAPP {
+				isPass = false
+			}
+		} else {
+			go func() {
+				cAPP <- true
+			}()
+		}
+
+		if !isExDB {
+			go testDeleteDir(cDB, testConf.BackupDBDir)
+			if !<-cDB {
+				isPass = false
+			}
+		} else {
+			go func() {
+				cDB <- true
+			}()
+		}
+
 		go testDeleteDir(cLOG, testConf.LogDir)
+		if !<-cLOG {
+			isPass = false
+		}
 	} else {
 		go testDeleteZipFile(cAPP, fileToDelete.APPname)
 		go testDeleteZipFile(cDB, fileToDelete.DBname)
 		go func() {
 			cLOG <- true
 		}()
-	}
-
-	if !<-cAPP || !<-cDB || !<-cLOG {
-		isPass = false
 	}
 
 	return isPass

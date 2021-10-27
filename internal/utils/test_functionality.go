@@ -23,7 +23,7 @@ func RunTest(isDel bool, isExDB bool, isExAPP bool) {
 	if isPass := testBackup(isExDB, isExAPP); isPass {
 		log.Println("[INFO] Success creating backup for database and app")
 	}
-	if isPass := testDelete(isDel); isPass {
+	if isPass := testDelete(isDel, isExDB, isExAPP); isPass {
 		log.Println("[INFO] Success deleting dir that created by this test")
 	}
 	log.Println("[INFO] Successfully testing all config file and functionality!")
