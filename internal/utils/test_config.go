@@ -3,6 +3,7 @@ package utils
 import (
 	"io/ioutil"
 	"log"
+	"os"
 
 	"gopkg.in/yaml.v2"
 )
@@ -39,6 +40,13 @@ func testCheckConfig() bool {
 	if len(testConf.Backup.DB.Databases) == 0 {
 		log.Println("[ERROR] There should be at least one database {- database:} configured!")
 		isPass = false
+	}
+	if err := testConf.EnsureDBTypeExists(); err != nil {
+		log.Println("[ERROR] Make sure DB Type is not empty. Fill in with either 'pg' or 'mdb'.")
+		isPass = false
+	}
+	if !isPass {
+		os.Exit(1)
 	}
 
 	testConf.SanitizeLogDir()

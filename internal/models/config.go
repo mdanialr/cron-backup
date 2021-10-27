@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"strings"
 )
 
@@ -94,6 +95,17 @@ func (c *Config) SetupSpecificBackupRetain() {
 	if c.Backup.APP.Retain == 0 {
 		c.Backup.APP.Retain = c.Backup.Retain
 	}
+}
+
+// EnsureDBTypeExists return error if DB type is empty
+func (c *Config) EnsureDBTypeExists() error {
+	for i := range c.Backup.DB.Databases {
+		v := &c.Backup.DB.Databases[i]
+		if v.Database.Type == "" {
+			return errors.New("")
+		}
+	}
+	return nil
 }
 
 // SetupDBType distinguish PostgresSQL and MariaDB and setup
