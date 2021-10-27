@@ -33,6 +33,10 @@ func testCheckConfig() bool {
 		log.Println("[ERROR] Backup root dir {root_dir:} in config.yaml file must not empty!")
 		isPass = false
 	}
+	if testConf.Backup.Retain == 0 {
+		log.Println("[ERROR] Number of days to retain backup (app and db) in config.yaml file must not empty!")
+		isPass = false
+	}
 	if len(testConf.Backup.APP.Apps) == 0 {
 		log.Println("[ERROR] There should be at least one appfile {- appfile:} configured!")
 		isPass = false
