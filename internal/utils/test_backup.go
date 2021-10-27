@@ -85,7 +85,14 @@ func testBackupDB(c chan bool) {
 	if err := os.MkdirAll(backupDir, 0770); err != nil {
 		log.Fatalf("Failed to create dir for backup app in %v: %v\n", tDB.DirName, err)
 	}
-	dumpCmd, outName := parseDumpingPGCommand(tDB)
+
+	var dumpCmd, outName string
+	if tDB.T.MariaDB {
+		dumpCmd, outName = parseDumpingMariaDBCommand(tDB)
+	}
+	if tDB.T.PGsql {
+		dumpCmd, outName = parseDumpingPGCommand(tDB)
+	}
 	zipCmd := parseZippingCommand(tDB, outName)
 
 	// dumping database
@@ -113,6 +120,23 @@ func testBackupDB(c chan bool) {
 	}
 
 	c <- isPass
+}
+
+// parseDumpingMariaDBCommand combine all commands for dumping database
+func parseDumpingMariaDBCommand(db models.Database) (string, string) {
+	cmd := "mariadb-dump " + db.Name
+	usr := "-u " + db.Usr
+	pwd := "-p" + db.Pwd
+	outName := "dump_" + db.Name
+	cmdSeries := []string{
+		cmd,
+		usr,
+		pwd,
+		">",
+		outName,
+	}
+	dumpCmd := strings.Join(cmdSeries, " ")
+	return strings.Join([]string{"cd /tmp", dumpCmd}, ";"), outName
 }
 
 // parseDumpingPGCommand combine all commands for dumping database

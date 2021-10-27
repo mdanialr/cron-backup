@@ -18,8 +18,17 @@ type APP struct {
 	Retain int  `yaml:"days_number_to_retain"`
 }
 
+type dbType struct {
+	PGsql   bool
+	MariaDB bool
+}
+
 type Database struct {
+	T       dbType
+	Type    string `yaml:"type"`
 	Name    string `yaml:"dbname"`
+	Usr     string `yaml:"dbuser"`
+	Pwd     string `yaml:"dbpass"`
 	DirName string `yaml:"backup_dir_name"`
 }
 
@@ -84,5 +93,20 @@ func (c *Config) SetupSpecificBackupRetain() {
 	}
 	if c.Backup.APP.Retain == 0 {
 		c.Backup.APP.Retain = c.Backup.Retain
+	}
+}
+
+// SetupDBType distinguish PostgresSQL and MariaDB and setup
+// the bool type
+func (c *Config) SetupDBType() {
+	for i := range c.Backup.DB.Databases {
+		v := &c.Backup.DB.Databases[i]
+		l := strings.ToLower(v.Database.Type)
+		if strings.HasPrefix(l, "pg") {
+			v.Database.T.PGsql = true
+		}
+		if strings.HasPrefix(l, "my") || strings.HasPrefix(l, "md") {
+			v.Database.T.MariaDB = true
+		}
 	}
 }

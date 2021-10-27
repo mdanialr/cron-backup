@@ -46,6 +46,7 @@ func testCheckConfig() bool {
 	testConf.SanitizeAppDir()
 	testConf.SetupBackupDir()
 	testConf.SetupSpecificBackupRetain()
+	testConf.SetupDBType()
 
 	return isPass
 }
