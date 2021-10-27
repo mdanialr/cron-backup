@@ -85,7 +85,7 @@ func testBackupDB(c chan bool) {
 	if err := os.MkdirAll(backupDir, 0770); err != nil {
 		log.Fatalf("Failed to create dir for backup app in %v: %v\n", tDB.DirName, err)
 	}
-	dumpCmd, outName := parseDumpingCommand(tDB)
+	dumpCmd, outName := parseDumpingPGCommand(tDB)
 	zipCmd := parseZippingCommand(tDB, outName)
 
 	// dumping database
@@ -119,8 +119,8 @@ func testBackupDB(c chan bool) {
 	c <- isPass
 }
 
-// parseDumpingCommand combine all commands for dumping database
-func parseDumpingCommand(db models.Database) (string, string) {
+// parseDumpingPGCommand combine all commands for dumping database
+func parseDumpingPGCommand(db models.Database) (string, string) {
 	cmd := "sudo -u postgres pg_dump"
 	args := "--clean --no-owner"
 	outName := "dump_" + db.Name
