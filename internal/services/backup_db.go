@@ -18,8 +18,8 @@ func backupDB(wg *sync.WaitGroup) {
 		if err := makeSureDirExists(backupDir); err != nil {
 			log.Fatalf("Failed to create dir for backup app in %v: %v\n", v.Database.DirName, err)
 		}
-		dumpCmd, outName := parseDumpingCommand(v.Database)
-		zipCmd := parseZippingCommand(v.Database, outName)
+		dumpCmd, outName := parseDumpingDBCmd(v.Database)
+		zipCmd := parseZippingDBCmd(v.Database, outName)
 
 		// delete old backup
 		wg.Add(1)
@@ -64,8 +64,8 @@ func backupDB(wg *sync.WaitGroup) {
 	wg.Done()
 }
 
-// parseDumpingCommand combine all commands for dumping database
-func parseDumpingCommand(db models.Database) (string, string) {
+// parseDumpingDBCmd combine all commands for dumping database
+func parseDumpingDBCmd(db models.Database) (string, string) {
 	cmd := "sudo -u postgres pg_dump"
 	args := "--clean --no-owner"
 	outName := "dump_" + db.Name
@@ -80,8 +80,8 @@ func parseDumpingCommand(db models.Database) (string, string) {
 	return strings.Join([]string{"cd /tmp", dumpCmd}, ";"), outName
 }
 
-// parseZippingCommand combine all commands for zipping dumped database
-func parseZippingCommand(db models.Database, outName string) string {
+// parseZippingDBCmd combine all commands for zipping dumped database
+func parseZippingDBCmd(db models.Database, outName string) string {
 	fmtTime := time.Now().Format("2006-Jan-02_Monday_15:04:05")
 	fName := "/" + fmtTime + ".zip"
 	zipName := helpers.Conf.BackupDBDir + db.DirName + fName

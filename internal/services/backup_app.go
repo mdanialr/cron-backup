@@ -18,7 +18,7 @@ func backupAPP(wg *sync.WaitGroup) {
 		if err := makeSureDirExists(backupDir); err != nil {
 			log.Fatalf("Failed to create dir for backup app in %v: %v\n", v.App.AppDir, err)
 		}
-		commands := parseBackupAPPCommand(v.App)
+		commands := parseZippingAPPCmd(v.App)
 
 		// delete old backup
 		wg.Add(1)
@@ -45,8 +45,8 @@ func backupAPP(wg *sync.WaitGroup) {
 	wg.Done()
 }
 
-// parseBackupAPPCommand combine all commands and args
-func parseBackupAPPCommand(app models.App) string {
+// parseZippingAPPCmd combine all commands and args in purpose to zip backup file
+func parseZippingAPPCmd(app models.App) string {
 	fmtTime := time.Now().Format("2006-Jan-02_Monday_15:04:05")
 	fName := "/" + fmtTime + ".zip"
 	zipName := helpers.Conf.BackupAppDir + app.DirName + fName
