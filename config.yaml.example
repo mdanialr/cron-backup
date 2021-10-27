@@ -3,17 +3,19 @@ backup:
   root_dir: "/full/path/to/dir"
   days_number_to_retain: 6
   database:
-    # this database backup uses:
-    # command: pg_dump
-    # user: postgres
-    # params: --clean --no-owner
     days_number_to_retain:
     databases:
       - database:
+          type: {pg/mdb}
           dbname: db_name
+          dbuser: db_usr
+          dbpass: db_pwd
           backup_dir_name: db-backupname
       - database:
+          type: {pg/mdb}
           dbname: db_name
+          dbuser: db_usr
+          dbpass: db_pwd
           backup_dir_name: db-backupname
   app:
     days_number_to_retain:
