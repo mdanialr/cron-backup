@@ -5,18 +5,20 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/mdanialr/go-cron-backup/internal/helpers"
 )
 
 // testDelete delete zip file that created by RunTest
-func testDelete(isDel bool, isExDB bool, isExAPP bool) bool {
+func testDelete() bool {
 	isPass := true
 
 	cAPP := make(chan bool)
 	cDB := make(chan bool)
 	cLOG := make(chan bool)
 
-	if isDel {
-		if !isExAPP {
+	if helpers.TCond.IsDel {
+		if !helpers.TCond.IsNoAPP {
 			go testDeleteDir(cAPP, testConf.BackupAppDir)
 			if !<-cAPP {
 				isPass = false
@@ -27,7 +29,7 @@ func testDelete(isDel bool, isExDB bool, isExAPP bool) bool {
 			}()
 		}
 
-		if !isExDB {
+		if !helpers.TCond.IsNoDB {
 			go testDeleteDir(cDB, testConf.BackupDBDir)
 			if !<-cDB {
 				isPass = false

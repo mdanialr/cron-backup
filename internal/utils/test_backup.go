@@ -7,29 +7,30 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mdanialr/go-cron-backup/internal/helpers"
 	"github.com/mdanialr/go-cron-backup/internal/models"
 )
 
 // testBackup try to run backup and handle the goroutine
-func testBackup(isExDB bool, isExAPP bool) bool {
+func testBackup() bool {
 	isPass := true
 
 	cAPP := make(chan bool)
 	cDB := make(chan bool)
 
-	if isExAPP {
+	if helpers.TCond.IsNoAPP {
 		log.Println("[INFO] Excluding app from this test")
 	}
-	if isExDB {
+	if helpers.TCond.IsNoDB {
 		log.Println("[INFO] Excluding database from this test")
 	}
-	if !isExAPP {
+	if !helpers.TCond.IsNoAPP {
 		go testBackupAPP(cAPP)
 		if !<-cAPP {
 			isPass = false
 		}
 	}
-	if !isExDB {
+	if !helpers.TCond.IsNoDB {
 		go testBackupDB(cDB)
 		if !<-cDB {
 			isPass = false

@@ -13,17 +13,17 @@ var fileToDelete struct {
 }
 
 // RunTest main function to run all checking and testing then throw all errors if any
-func RunTest(isDel bool, isExDB bool, isExAPP bool) {
+func RunTest() {
 	if isPass := testCheckConfig(); isPass {
 		log.Println("[INFO] Success checking config file")
 	}
 	if isPass := testCreateDir(); isPass {
 		log.Println("[INFO] Success creating log and backup folder")
 	}
-	if isPass := testBackup(isExDB, isExAPP); isPass {
+	if isPass := testBackup(); isPass {
 		log.Println("[INFO] Success creating backup for database and app")
 	}
-	if isPass := testDelete(isDel, isExDB, isExAPP); isPass {
+	if isPass := testDelete(); isPass {
 		log.Println("[INFO] Success deleting dir that created by this test")
 	}
 	log.Println("[INFO] Successfully testing all config file and functionality!")
