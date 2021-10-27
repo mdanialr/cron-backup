@@ -22,7 +22,13 @@ func backupDB(wg *sync.WaitGroup) {
 		zipCmd := parseZippingCommand(v.Database, outName)
 
 		// delete old backup
-		deleteOldBackupDB(wg, backupDir)
+		wg.Add(1)
+		go func(wg *sync.WaitGroup) {
+			if err := deleteOldBackup(backupDir, helpers.Conf.Backup.DB.Retain); err != nil {
+				helpers.NzLogError.Println(err)
+			}
+			wg.Done()
+		}(wg)
 
 		// goroutine to separate zip proccess from main thread
 		wg.Add(1)

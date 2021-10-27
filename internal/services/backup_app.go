@@ -21,7 +21,13 @@ func backupAPP(wg *sync.WaitGroup) {
 		commands := parseBackupAPPCommand(v.App)
 
 		// delete old backup
-		deleteOldBackupAPP(wg, backupDir)
+		wg.Add(1)
+		go func(wg *sync.WaitGroup) {
+			if err := deleteOldBackup(backupDir, helpers.Conf.Backup.APP.Retain); err != nil {
+				helpers.NzLogError.Println(err)
+			}
+			wg.Done()
+		}(wg)
 
 		// goroutine to separate zip proccess from main thread
 		wg.Add(1)
