@@ -23,10 +23,6 @@ func testDelete() bool {
 			if !<-cAPP {
 				isPass = false
 			}
-		} else {
-			go func() {
-				cAPP <- true
-			}()
 		}
 
 		if !helpers.TCond.IsNoDB {
@@ -34,10 +30,6 @@ func testDelete() bool {
 			if !<-cDB {
 				isPass = false
 			}
-		} else {
-			go func() {
-				cDB <- true
-			}()
 		}
 
 		go testDeleteDir(cLOG, testConf.LogDir)
@@ -47,6 +39,9 @@ func testDelete() bool {
 	} else {
 		go testDeleteZipFile(cAPP, fileToDelete.APPname)
 		go testDeleteZipFile(cDB, fileToDelete.DBname)
+		if !<-cAPP || !<-cDB {
+			isPass = false
+		}
 		go func() {
 			cLOG <- true
 		}()
