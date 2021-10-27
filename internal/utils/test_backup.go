@@ -107,14 +107,10 @@ func testBackupDB(c chan bool) {
 	log.Println("[DONE] zipping", "'"+tDB.Name+"'")
 
 	// delete dumped database from /tmp
-	log.Printf("[START] deleting leftover file '%v' from /tmp \n", outName)
-	delCmd := parseDelDumpedDBCommand(outName)
-	out, err = exec.Command("sh", "-c", delCmd).CombinedOutput()
-	if err != nil {
+	if err := testDeleteDumpedFile(); err != nil {
 		log.Println(string(out))
 		isPass = false
 	}
-	log.Println("[DONE] deleting leftover file", outName)
 
 	c <- isPass
 }
@@ -146,14 +142,5 @@ func parseZippingCommand(db models.Database, outName string) string {
 	}
 	fileToDelete.DBname = zipName
 
-	return strings.Join(cmdSeries, ";")
-}
-
-// parseDelDumpedDBCommand combine all commands for deleting dumped database
-func parseDelDumpedDBCommand(db string) string {
-	cmdSeries := []string{
-		"cd /tmp",
-		"rm " + db,
-	}
 	return strings.Join(cmdSeries, ";")
 }

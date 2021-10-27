@@ -2,7 +2,9 @@ package utils
 
 import (
 	"log"
+	"os"
 	"os/exec"
+	"strings"
 )
 
 // testDelete delete zip file that created by RunTest
@@ -60,4 +62,24 @@ func testDeleteZipFile(c chan bool, dir string) {
 	log.Println("[DONE] deleting zip file:", "'"+dir+"'")
 
 	c <- isPass
+}
+
+// testDeleteDumpedFile delete dumped file in /tmp after zipping it
+func testDeleteDumpedFile() error {
+	log.Println("[START] deleting leftover dumped db file from /tmp")
+
+	files, err := os.ReadDir("/tmp")
+	if err != nil {
+		return err
+	}
+
+	for _, fl := range files {
+		if strings.HasPrefix(fl.Name(), "dump") {
+			if err := os.Remove("/tmp/" + fl.Name()); err != nil {
+				return err
+			}
+		}
+	}
+	log.Println("[DONE] deleting leftover dumped db file from /tmp")
+	return nil
 }
