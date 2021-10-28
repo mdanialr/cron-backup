@@ -36,6 +36,7 @@ func backupAPP(wg *sync.WaitGroup) {
 			out, err := exec.Command("sh", "-c", commands).CombinedOutput()
 			if err != nil {
 				helpers.NzLogError.Println(string(out))
+				helpers.NzLogError.Println(err)
 			}
 			helpers.NzLogInfo.Println("[DONE] zipping", "'"+app.DirName+"'")
 

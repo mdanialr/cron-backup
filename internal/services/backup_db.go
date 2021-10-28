@@ -38,6 +38,7 @@ func backupDB(wg *sync.WaitGroup) {
 			out, err := exec.Command("sh", "-c", dumpCmd).CombinedOutput()
 			if err != nil {
 				helpers.NzLogError.Println(string(out))
+				helpers.NzLogError.Println(err)
 			}
 			helpers.NzLogInfo.Println("[DONE] dumping", "'"+db.Name+"'")
 
@@ -46,6 +47,7 @@ func backupDB(wg *sync.WaitGroup) {
 			out, err = exec.Command("sh", "-c", zipCmd).CombinedOutput()
 			if err != nil {
 				helpers.NzLogError.Println(string(out))
+				helpers.NzLogError.Println(err)
 			}
 			helpers.NzLogInfo.Println("[DONE] zipping", "'"+db.Name+"'")
 
