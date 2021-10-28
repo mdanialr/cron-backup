@@ -55,14 +55,6 @@ func backupDB(wg *sync.WaitGroup) {
 		}(wg, v.Database)
 	}
 
-	wg.Add(1)
-	go func(wg *sync.WaitGroup) {
-		if err := deleteDumpedFile(); err != nil {
-			helpers.NzLogError.Println(err)
-		}
-		wg.Done()
-	}(wg)
-
 	wg.Done()
 }
 

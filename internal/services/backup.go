@@ -20,6 +20,10 @@ func Backup() {
 	go backupDB(&wg)
 
 	wg.Wait()
+
+	if err := deleteDumpedFile(); err != nil {
+		helpers.NzLogError.Println(err)
+	}
 }
 
 // makeSureDirExists make sure dir for backup apps exists by creating it
