@@ -49,6 +49,7 @@ func testCheckConfig() bool {
 		log.Println("[ERROR] Make sure DB Type is not empty. Fill in with either 'pg' or 'mdb'.")
 		isPass = false
 	}
+	testConf.SetupDBType()
 	if err := testConf.SanitizeAndCheckDB(); err != nil {
 		log.Println("[ERROR]", err)
 		isPass = false
@@ -62,7 +63,6 @@ func testCheckConfig() bool {
 	testConf.SanitizeAppDir()
 	testConf.SetupBackupDir()
 	testConf.SetupSpecificBackupRetain()
-	testConf.SetupDBType()
 
 	return isPass
 }
