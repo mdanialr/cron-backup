@@ -3,7 +3,6 @@ package utils
 import (
 	"log"
 	"os"
-	"os/exec"
 	"strings"
 
 	"github.com/mdanialr/go-cron-backup/internal/helpers"
@@ -58,11 +57,12 @@ func testDeleteDir(c chan bool, dir string) {
 	isPass := true
 
 	log.Println("[START] deleting test backup in", "'"+dir+"'")
-	out, err := exec.Command("sh", "-c", "rm -r "+dir).CombinedOutput()
-	if err != nil {
-		log.Println(string(out))
+
+	if err := os.RemoveAll(dir); err != nil {
 		isPass = false
+		log.Fatalln("[ERROR]", err)
 	}
+
 	log.Println("[DONE] deleting test backup in", "'"+dir+"'")
 
 	c <- isPass
