@@ -12,7 +12,6 @@ import (
 // BashDBZip create the fullpath plus formated zip name from
 // dumped database
 func BashDBZip(db models.Database, fileToZip string) error {
-	// create the z
 	fmtTime := time.Now().Format("2006-Jan-02_Monday_15:04:05")
 	fName := "/" + fmtTime + ".zip"
 	zipName := helpers.Conf.BackupDBDir + db.DirName + fName
