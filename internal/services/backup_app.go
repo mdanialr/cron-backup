@@ -2,11 +2,9 @@ package services
 
 import (
 	"log"
-	"os/exec"
-	"strings"
 	"sync"
-	"time"
 
+	"github.com/mdanialr/go-cron-backup/internal/arch"
 	"github.com/mdanialr/go-cron-backup/internal/helpers"
 	"github.com/mdanialr/go-cron-backup/internal/models"
 )
@@ -18,7 +16,6 @@ func backupAPP(wg *sync.WaitGroup) {
 		if err := makeSureDirExists(backupDir); err != nil {
 			log.Fatalf("Failed to create dir for backup app in %v: %v\n", v.App.AppDir, err)
 		}
-		commands := parseZippingAPPCmd(v.App)
 
 		// delete old backup
 		wg.Add(1)
@@ -33,9 +30,7 @@ func backupAPP(wg *sync.WaitGroup) {
 		wg.Add(1)
 		go func(wg *sync.WaitGroup, app models.App) {
 			helpers.NzLogInfo.Println("[START] zipping in", "'"+app.AppDir+"'")
-			out, err := exec.Command("sh", "-c", commands).CombinedOutput()
-			if err != nil {
-				helpers.NzLogError.Println(string(out))
+			if err := arch.BashAPPZip(app); err != nil {
 				helpers.NzLogError.Println(err)
 			}
 			helpers.NzLogInfo.Println("[DONE] zipping", "'"+app.DirName+"'")
@@ -44,16 +39,4 @@ func backupAPP(wg *sync.WaitGroup) {
 		}(wg, v.App)
 	}
 	wg.Done()
-}
-
-// parseZippingAPPCmd combine all commands and args in purpose to zip backup file
-func parseZippingAPPCmd(app models.App) string {
-	fmtTime := time.Now().Format("2006-Jan-02_Monday_15:04:05")
-	fName := "/" + fmtTime + ".zip"
-	zipName := helpers.Conf.BackupAppDir + app.DirName + fName
-	cmdSeries := []string{
-		"cd " + app.AppDir,
-		"zip -r -q " + zipName + " *",
-	}
-	return strings.Join(cmdSeries, ";")
 }
