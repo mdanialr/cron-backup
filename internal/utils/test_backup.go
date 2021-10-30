@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mdanialr/go-cron-backup/internal/arch"
 	"github.com/mdanialr/go-cron-backup/internal/helpers"
 	"github.com/mdanialr/go-cron-backup/internal/models"
 )
@@ -52,30 +53,20 @@ func testBackupAPP(c chan bool) {
 	if err := os.MkdirAll(backupDir, 0770); err != nil {
 		log.Fatalf("Failed to create dir for backup app in %v: %v\n", tAPP.AppDir, err)
 	}
-	commands := parseBackupAPPCommand(tAPP)
 
 	log.Println("[START] zipping in", "'"+tAPP.AppDir+"'")
-	out, err := exec.Command("sh", "-c", commands).CombinedOutput()
-	if err != nil {
-		log.Println(string(out))
+
+	fmtTime := time.Now().Format("2006-Jan-02_Monday_15:04:05")
+	fName := "/" + fmtTime + ".zip"
+	zipName := testConf.BackupAppDir + tAPP.DirName + fName
+
+	if err := arch.ZipDir(tAPP.AppDir, zipName); err != nil {
+		log.Fatalf("Failed zipping in %v: %v", tAPP.DirName, err)
 	}
+
 	log.Println("[DONE] zipping", "'"+tAPP.DirName+"'")
 
 	c <- isPass
-}
-
-// parseBackupAPPCommand combine all commands and args
-func parseBackupAPPCommand(app models.App) string {
-	fmtTime := time.Now().Format("2006-Jan-02_Monday_15:04:05")
-	fName := "/" + fmtTime + ".zip"
-	zipName := testConf.BackupAppDir + app.DirName + fName
-	cmdSeries := []string{
-		"cd " + app.AppDir,
-		"zip -r -q " + zipName + " *",
-	}
-	fileToDelete.APPname = zipName
-
-	return strings.Join(cmdSeries, ";")
 }
 
 // testBackupDB try to run backup on first database in config file
@@ -95,7 +86,6 @@ func testBackupDB(c chan bool) {
 	if tDB.T.PGsql {
 		dumpCmd, outName = parseDumpingPGCommand(tDB)
 	}
-	zipCmd := parseZippingCommand(tDB, outName)
 
 	// dumping database
 	log.Println("[START] dumping database", "'"+tDB.Name+"'")
@@ -108,11 +98,15 @@ func testBackupDB(c chan bool) {
 
 	// zipping dumped database
 	log.Println("[START] zipping dumped database", "'"+tDB.Name+"'")
-	out, err = exec.Command("sh", "-c", zipCmd).CombinedOutput()
-	if err != nil {
-		log.Println(string(out))
-		isPass = false
+
+	fmtTime := time.Now().Format("2006-Jan-02_Monday_15:04:05")
+	fName := "/" + fmtTime + ".zip"
+	zipName := testConf.BackupDBDir + tDB.DirName + fName
+
+	if err := arch.Zip("/tmp/"+outName, zipName); err != nil {
+		log.Fatalf("Failed zipping %v: %v", outName, err)
 	}
+
 	log.Println("[DONE] zipping", "'"+tDB.Name+"'")
 
 	// delete dumped database from /tmp
@@ -155,18 +149,4 @@ func parseDumpingPGCommand(db models.Database) (string, string) {
 	}
 	dumpCmd := strings.Join(cmdSeries, " ")
 	return strings.Join([]string{"cd /tmp", dumpCmd}, ";"), outName
-}
-
-// parseZippingCommand combine all commands for zipping dumped database
-func parseZippingCommand(db models.Database, outName string) string {
-	fmtTime := time.Now().Format("2006-Jan-02_Monday_15:04:05")
-	fName := "/" + fmtTime + ".zip"
-	zipName := testConf.BackupDBDir + db.DirName + fName
-	cmdSeries := []string{
-		"cd /tmp",
-		"zip -q " + zipName + " " + outName,
-	}
-	fileToDelete.DBname = zipName
-
-	return strings.Join(cmdSeries, ";")
 }
