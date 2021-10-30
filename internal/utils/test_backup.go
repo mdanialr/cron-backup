@@ -123,11 +123,15 @@ func testBackupDB(c chan bool) {
 // parseDumpingMariaDBCommand combine all commands for dumping database
 func parseDumpingMariaDBCommand(db models.Database) (string, string) {
 	cmd := "mariadb-dump " + db.Name
+	host := "-h " + db.Host
+	port := "-P " + strconv.Itoa(db.Port)
 	usr := "-u " + db.Usr
 	pwd := "-p" + db.Pwd
 	outName := "dump_" + db.Name
 	cmdSeries := []string{
 		cmd,
+		host,
+		port,
 		usr,
 		pwd,
 		">",
