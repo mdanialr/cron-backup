@@ -7,12 +7,16 @@ backup:
     databases:
       - database:
           type: {pg/mdb}
+          hostname: ip_to_server
+          port: dbport in integer
           dbname: db_name
           dbuser: db_usr
           dbpass: db_pwd
           backup_dir_name: db-backupname
       - database:
           type: {pg/mdb}
+          hostname: ip_to_server
+          port: dbport in integer
           dbname: db_name
           dbuser: db_usr
           dbpass: db_pwd
