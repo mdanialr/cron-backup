@@ -28,5 +28,7 @@ func LoadConfigFromFile() {
 	Conf.SanitizeAppDir()
 	Conf.SetupBackupDir()
 	Conf.SetupSpecificBackupRetain()
+	Conf.EnsureDBTypeExists()
 	Conf.SetupDBType()
+	Conf.SanitizeAndCheckDB()
 }
