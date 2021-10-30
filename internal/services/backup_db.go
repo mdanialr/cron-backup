@@ -3,7 +3,6 @@ package services
 import (
 	"log"
 	"os/exec"
-	"strings"
 	"sync"
 	"time"
 
@@ -19,7 +18,14 @@ func backupDB(wg *sync.WaitGroup) {
 		if err := makeSureDirExists(backupDir); err != nil {
 			log.Fatalf("Failed to create dir for backup app in %v: %v\n", v.Database.DirName, err)
 		}
-		dumpCmd, outName := parseDumpingDBCmd(v.Database)
+
+		var dumpCmd, outName string
+		if v.Database.T.MariaDB {
+			dumpCmd, outName = parseDumpingMariaDBCommand(v.Database)
+		}
+		if v.Database.T.PGsql {
+			dumpCmd, outName = parseDumpingPGCommand(v.Database)
+		}
 
 		// delete old backup
 		wg.Add(1)
@@ -58,20 +64,4 @@ func backupDB(wg *sync.WaitGroup) {
 	}
 
 	wg.Done()
-}
-
-// parseDumpingDBCmd combine all commands for dumping database
-func parseDumpingDBCmd(db models.Database) (string, string) {
-	cmd := "sudo -u postgres pg_dump"
-	args := "--clean --no-owner"
-	outName := "dump_" + db.Name
-	cmdSeries := []string{
-		cmd,
-		db.Name,
-		args,
-		">",
-		outName,
-	}
-	dumpCmd := strings.Join(cmdSeries, " ")
-	return strings.Join([]string{"cd /tmp", dumpCmd}, ";"), outName
 }
