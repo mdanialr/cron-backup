@@ -31,4 +31,5 @@ func LoadConfigFromFile() {
 	Conf.EnsureDBTypeExists()
 	Conf.SetupDBType()
 	Conf.SanitizeAndCheckDB()
+	Conf.SanitizeAndSetupSample()
 }

@@ -49,24 +49,26 @@ func testBackup() bool {
 func testBackupAPP(c chan bool) {
 	isPass := true
 
-	tAPP := testConf.Backup.APP.Apps[0].App
-	backupDir := testConf.BackupAppDir + tAPP.DirName
-	if err := os.MkdirAll(backupDir, 0770); err != nil {
-		log.Fatalf("Failed to create dir for backup app in %v: %v\n", tAPP.AppDir, err)
+	for _, v := range testConf.Backup.APP.Apps[0:testConf.Backup.APP.Sample] {
+		tAPP := v.App
+		backupDir := testConf.BackupAppDir + tAPP.DirName
+		if err := os.MkdirAll(backupDir, 0770); err != nil {
+			log.Fatalf("Failed to create dir for backup app in %v: %v\n", tAPP.AppDir, err)
+		}
+
+		log.Println("[START] zipping in", "'"+tAPP.AppDir+"'")
+
+		fmtTime := time.Now().Format("2006-Jan-02_Monday_15:04:05")
+		fName := "/" + fmtTime + ".zip"
+		zipName := testConf.BackupAppDir + tAPP.DirName + fName
+
+		if err := arch.ZipDir(tAPP.AppDir, zipName); err != nil {
+			log.Fatalf("Failed zipping in %v: %v", tAPP.DirName, err)
+		}
+		fileToDelete.APPname = zipName
+
+		log.Println("[DONE] zipping", "'"+tAPP.DirName+"'")
 	}
-
-	log.Println("[START] zipping in", "'"+tAPP.AppDir+"'")
-
-	fmtTime := time.Now().Format("2006-Jan-02_Monday_15:04:05")
-	fName := "/" + fmtTime + ".zip"
-	zipName := testConf.BackupAppDir + tAPP.DirName + fName
-
-	if err := arch.ZipDir(tAPP.AppDir, zipName); err != nil {
-		log.Fatalf("Failed zipping in %v: %v", tAPP.DirName, err)
-	}
-	fileToDelete.APPname = zipName
-
-	log.Println("[DONE] zipping", "'"+tAPP.DirName+"'")
 
 	c <- isPass
 }
@@ -75,46 +77,48 @@ func testBackupAPP(c chan bool) {
 func testBackupDB(c chan bool) {
 	isPass := true
 
-	tDB := testConf.Backup.DB.Databases[0].Database
-	backupDir := testConf.BackupDBDir + tDB.DirName
-	if err := os.MkdirAll(backupDir, 0770); err != nil {
-		log.Fatalf("Failed to create dir for backup app in %v: %v\n", tDB.DirName, err)
-	}
+	for _, v := range testConf.Backup.DB.Databases[0:testConf.Backup.DB.Sample] {
+		tDB := v.Database
+		backupDir := testConf.BackupDBDir + tDB.DirName
+		if err := os.MkdirAll(backupDir, 0770); err != nil {
+			log.Fatalf("Failed to create dir for backup app in %v: %v\n", tDB.DirName, err)
+		}
 
-	var dumpCmd, outName string
-	if tDB.T.MariaDB {
-		dumpCmd, outName = parseDumpingMariaDBCommand(tDB)
-	}
-	if tDB.T.PGsql {
-		dumpCmd, outName = parseDumpingPGCommand(tDB)
-	}
+		var dumpCmd, outName string
+		if tDB.T.MariaDB {
+			dumpCmd, outName = parseDumpingMariaDBCommand(tDB)
+		}
+		if tDB.T.PGsql {
+			dumpCmd, outName = parseDumpingPGCommand(tDB)
+		}
 
-	// dumping database
-	log.Println("[START] dumping database", "'"+tDB.Name+"'")
-	if out, err := exec.Command("sh", "-c", dumpCmd).CombinedOutput(); err != nil {
-		log.Fatalln(err, string(out))
-		isPass = false
-	}
-	log.Println("[DONE] dumping", "'"+tDB.Name+"'")
+		// dumping database
+		log.Println("[START] dumping database", "'"+tDB.Name+"'")
+		if out, err := exec.Command("sh", "-c", dumpCmd).CombinedOutput(); err != nil {
+			log.Fatalln(err, string(out))
+			isPass = false
+		}
+		log.Println("[DONE] dumping", "'"+tDB.Name+"'")
 
-	// zipping dumped database
-	log.Println("[START] zipping dumped database", "'"+tDB.Name+"'")
+		// zipping dumped database
+		log.Println("[START] zipping dumped database", "'"+tDB.Name+"'")
 
-	fmtTime := time.Now().Format("2006-Jan-02_Monday_15:04:05")
-	fName := "/" + fmtTime + ".zip"
-	zipName := testConf.BackupDBDir + tDB.DirName + fName
+		fmtTime := time.Now().Format("2006-Jan-02_Monday_15:04:05")
+		fName := "/" + fmtTime + ".zip"
+		zipName := testConf.BackupDBDir + tDB.DirName + fName
 
-	if err := arch.Zip("/tmp/"+outName, zipName); err != nil {
-		log.Fatalf("Failed zipping %v: %v", outName, err)
-	}
-	fileToDelete.DBname = zipName
+		if err := arch.Zip("/tmp/"+outName, zipName); err != nil {
+			log.Fatalf("Failed zipping %v: %v", outName, err)
+		}
+		fileToDelete.DBname = zipName
 
-	log.Println("[DONE] zipping", "'"+tDB.Name+"'")
+		log.Println("[DONE] zipping", "'"+tDB.Name+"'")
 
-	// delete dumped database from /tmp
-	if err := testDeleteDumpedFile(); err != nil {
-		log.Fatalln(err)
-		isPass = false
+		// delete dumped database from /tmp
+		if err := testDeleteDumpedFile(); err != nil {
+			log.Fatalln(err)
+			isPass = false
+		}
 	}
 
 	c <- isPass

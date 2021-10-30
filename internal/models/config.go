@@ -17,6 +17,7 @@ type Apps []struct {
 type APP struct {
 	Apps   Apps `yaml:"apps"`
 	Retain int  `yaml:"days_number_to_retain"`
+	Sample int  `yaml:"test_sample"`
 }
 
 type dbType struct {
@@ -42,6 +43,7 @@ type Databases []struct {
 type DB struct {
 	Databases Databases `yaml:"databases"`
 	Retain    int       `yaml:"days_number_to_retain"`
+	Sample    int       `yaml:"test_sample"`
 }
 
 type Backup struct {
@@ -146,5 +148,22 @@ func (c *Config) SetupDBType() {
 		if strings.HasPrefix(l, "my") || strings.HasPrefix(l, "md") {
 			v.Database.T.MariaDB = true
 		}
+	}
+}
+
+// SanitizeAndSetupSample sanitize to prevent panic caused slice
+// bounds out of range or sample is zero or not set
+func (c *Config) SanitizeAndSetupSample() {
+	if c.Backup.APP.Sample == 0 {
+		c.Backup.APP.Sample = 1
+	}
+	if c.Backup.DB.Sample == 0 {
+		c.Backup.DB.Sample = 1
+	}
+	if c.Backup.APP.Sample > len(c.Backup.APP.Apps) {
+		c.Backup.APP.Sample = len(c.Backup.APP.Apps)
+	}
+	if c.Backup.DB.Sample > len(c.Backup.DB.Databases) {
+		c.Backup.DB.Sample = len(c.Backup.DB.Databases)
 	}
 }
