@@ -69,16 +69,16 @@ func testDeleteDir(c chan bool, dir string) {
 }
 
 // testDeleteZipFile delete only zip file with given full path or dir
-func testDeleteZipFile(c chan bool, dir string) {
+func testDeleteZipFile(c chan bool, file string) {
 	isPass := true
 
-	log.Println("[START] deleting zip file:", "'"+dir+"'")
-	out, err := exec.Command("sh", "-c", "rm "+dir).CombinedOutput()
-	if err != nil {
-		log.Println(string(out))
-		isPass = false
+	log.Println("[START] deleting zip file:", "'"+file+"'")
+
+	if err := os.Remove(file); err != nil {
+		log.Fatalln("[ERROR]", err)
 	}
-	log.Println("[DONE] deleting zip file:", "'"+dir+"'")
+
+	log.Println("[DONE] deleting zip file:", "'"+file+"'")
 
 	c <- isPass
 }

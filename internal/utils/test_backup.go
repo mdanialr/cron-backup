@@ -64,6 +64,7 @@ func testBackupAPP(c chan bool) {
 	if err := arch.ZipDir(tAPP.AppDir, zipName); err != nil {
 		log.Fatalf("Failed zipping in %v: %v", tAPP.DirName, err)
 	}
+	fileToDelete.APPname = zipName
 
 	log.Println("[DONE] zipping", "'"+tAPP.DirName+"'")
 
@@ -106,6 +107,7 @@ func testBackupDB(c chan bool) {
 	if err := arch.Zip("/tmp/"+outName, zipName); err != nil {
 		log.Fatalf("Failed zipping %v: %v", outName, err)
 	}
+	fileToDelete.DBname = zipName
 
 	log.Println("[DONE] zipping", "'"+tDB.Name+"'")
 
