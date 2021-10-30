@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"time"
 
@@ -89,9 +90,8 @@ func testBackupDB(c chan bool) {
 
 	// dumping database
 	log.Println("[START] dumping database", "'"+tDB.Name+"'")
-	out, err := exec.Command("sh", "-c", dumpCmd).CombinedOutput()
-	if err != nil {
-		log.Println(string(out))
+	if out, err := exec.Command("sh", "-c", dumpCmd).CombinedOutput(); err != nil {
+		log.Fatalln(err, string(out))
 		isPass = false
 	}
 	log.Println("[DONE] dumping", "'"+tDB.Name+"'")
@@ -111,7 +111,7 @@ func testBackupDB(c chan bool) {
 
 	// delete dumped database from /tmp
 	if err := testDeleteDumpedFile(); err != nil {
-		log.Println(string(out))
+		log.Fatalln(err)
 		isPass = false
 	}
 
@@ -137,16 +137,21 @@ func parseDumpingMariaDBCommand(db models.Database) (string, string) {
 
 // parseDumpingPGCommand combine all commands for dumping database
 func parseDumpingPGCommand(db models.Database) (string, string) {
-	cmd := "sudo -u postgres pg_dump"
-	args := "--clean --no-owner"
+	// pg_dump --dbname=postgresql://usr:pwd@host:theport/thedb
+	cmd := "pg_dump "
+	params := "--dbname=postgresql://"
+	creds := db.Usr + ":" + db.Pwd + "@"
+	sock := db.Host + ":" + strconv.Itoa(db.Port) + "/"
 	outName := "dump_" + db.Name
 	cmdSeries := []string{
 		cmd,
+		params,
+		creds,
+		sock,
 		db.Name,
-		args,
-		">",
-		outName,
 	}
-	dumpCmd := strings.Join(cmdSeries, " ")
+	dumpCmd := strings.Join(cmdSeries, "")
+	dumpCmd += strings.Join([]string{">", outName}, " ")
+
 	return strings.Join([]string{"cd /tmp", dumpCmd}, ";"), outName
 }

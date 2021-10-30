@@ -49,6 +49,10 @@ func testCheckConfig() bool {
 		log.Println("[ERROR] Make sure DB Type is not empty. Fill in with either 'pg' or 'mdb'.")
 		isPass = false
 	}
+	if err := testConf.SanitizeAndCheckDB(); err != nil {
+		log.Println("[ERROR]", err)
+		isPass = false
+	}
 	if !isPass {
 		os.Exit(1)
 	}

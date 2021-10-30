@@ -27,6 +27,8 @@ type dbType struct {
 type Database struct {
 	T       dbType
 	Type    string `yaml:"type"`
+	Host    string `yaml:"hostname"`
+	Port    int    `yaml:"port"`
 	Name    string `yaml:"dbname"`
 	Usr     string `yaml:"dbuser"`
 	Pwd     string `yaml:"dbpass"`
@@ -103,6 +105,25 @@ func (c *Config) EnsureDBTypeExists() error {
 		v := &c.Backup.DB.Databases[i]
 		if v.Database.Type == "" {
 			return errors.New("")
+		}
+	}
+	return nil
+}
+
+// SanitizeAndCheckDB return error if DB user is empty.
+// Then assign default value to hostname and port if
+// either are empty.
+func (c *Config) SanitizeAndCheckDB() error {
+	for i := range c.Backup.DB.Databases {
+		db := &c.Backup.DB.Databases[i].Database
+		if db.Usr == "" {
+			return errors.New("make sure user for database connection is not empty")
+		}
+		if db.Host == "" {
+			db.Host = "localhost"
+		}
+		if db.Port == 0 {
+			db.Port = 5432
 		}
 	}
 	return nil
