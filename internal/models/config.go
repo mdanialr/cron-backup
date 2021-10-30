@@ -123,7 +123,12 @@ func (c *Config) SanitizeAndCheckDB() error {
 			db.Host = "localhost"
 		}
 		if db.Port == 0 {
-			db.Port = 5432
+			if db.T.MariaDB {
+				db.Port = 3306
+			}
+			if db.T.PGsql {
+				db.Port = 5432
+			}
 		}
 	}
 	return nil
