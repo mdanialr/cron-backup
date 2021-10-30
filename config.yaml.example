@@ -3,6 +3,7 @@ backup:
   root_dir: "/full/path/to/dir"
   days_number_to_retain: 6
   database:
+    test_sample: 2
     days_number_to_retain:
     databases:
       - database:
@@ -22,6 +23,7 @@ backup:
           dbpass: db_pwd
           backup_dir_name: db-backupname
   app:
+    test_sample: 1
     days_number_to_retain:
     apps:
       - appfile:
