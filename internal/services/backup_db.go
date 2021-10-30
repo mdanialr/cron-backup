@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/mdanialr/go-cron-backup/internal/arch"
 	"github.com/mdanialr/go-cron-backup/internal/helpers"
@@ -41,9 +42,15 @@ func backupDB(wg *sync.WaitGroup) {
 
 			// zipping dumped database
 			helpers.NzLogInfo.Println("[START] zipping dumped database", "'"+db.Name+"'")
-			if err := arch.BashDBZip(db, outName); err != nil {
-				helpers.NzLogError.Println(err)
+
+			fmtTime := time.Now().Format("2006-Jan-02_Monday_15:04:05")
+			fName := "/" + fmtTime + ".zip"
+			zipName := helpers.Conf.BackupDBDir + db.DirName + fName
+
+			if err := arch.Zip("/tmp/"+outName, zipName); err != nil {
+				helpers.NzLogError.Printf("Failed zipping %v: %v", outName, err)
 			}
+
 			helpers.NzLogInfo.Println("[DONE] zipping", "'"+db.Name+"'")
 
 			wg.Done()

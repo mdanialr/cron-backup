@@ -3,6 +3,7 @@ package services
 import (
 	"log"
 	"sync"
+	"time"
 
 	"github.com/mdanialr/go-cron-backup/internal/arch"
 	"github.com/mdanialr/go-cron-backup/internal/helpers"
@@ -30,9 +31,15 @@ func backupAPP(wg *sync.WaitGroup) {
 		wg.Add(1)
 		go func(wg *sync.WaitGroup, app models.App) {
 			helpers.NzLogInfo.Println("[START] zipping in", "'"+app.AppDir+"'")
-			if err := arch.BashAPPZip(app); err != nil {
-				helpers.NzLogError.Println(err)
+
+			fmtTime := time.Now().Format("2006-Jan-02_Monday_15:04:05")
+			fName := "/" + fmtTime + ".zip"
+			zipName := helpers.Conf.BackupAppDir + app.DirName + fName
+
+			if err := arch.ZipDir(app.AppDir, zipName); err != nil {
+				helpers.NzLogError.Printf("Failed zipping in %v: %v", app.DirName, err)
 			}
+
 			helpers.NzLogInfo.Println("[DONE] zipping", "'"+app.DirName+"'")
 
 			wg.Done()
