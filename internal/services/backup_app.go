@@ -10,7 +10,7 @@ import (
 	"github.com/mdanialr/go-cron-backup/internal/models"
 )
 
-// backupAPP do the backup using goroutine
+// backupAPP deleting old backup then zipping dir.
 func backupAPP(wg *sync.WaitGroup) {
 	defer wg.Done()
 

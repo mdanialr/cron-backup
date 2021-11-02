@@ -11,7 +11,7 @@ import (
 	"github.com/mdanialr/go-cron-backup/internal/models"
 )
 
-// backupDB do the backup using goroutine
+// backupDB deleting old backup, dump database then zip them.
 func backupDB(wg *sync.WaitGroup) {
 	defer wg.Done()
 
