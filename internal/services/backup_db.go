@@ -13,6 +13,8 @@ import (
 
 // backupDB do the backup using goroutine
 func backupDB(wg *sync.WaitGroup) {
+	defer wg.Done()
+
 	for _, v := range helpers.Conf.Backup.DB.Databases {
 		backupDir := helpers.Conf.BackupDBDir + v.Database.DirName
 		if err := makeSureDirExists(backupDir); err != nil {
@@ -30,15 +32,16 @@ func backupDB(wg *sync.WaitGroup) {
 		// delete old backup
 		wg.Add(1)
 		go func(wg *sync.WaitGroup) {
+			defer wg.Done()
 			if err := deleteOldBackup(backupDir, helpers.Conf.Backup.DB.Retain); err != nil {
 				helpers.NzLogError.Println(err)
 			}
-			wg.Done()
 		}(wg)
 
 		// goroutine to separate zip proccess from main thread
 		wg.Add(1)
 		go func(wg *sync.WaitGroup, db models.Database) {
+			defer wg.Done()
 			// dumping database
 			helpers.NzLogInfo.Println("[START] dumping database", "'"+db.Name+"'")
 			if _, err := exec.Command("sh", "-c", dumpCmd).CombinedOutput(); err != nil {
@@ -58,10 +61,6 @@ func backupDB(wg *sync.WaitGroup) {
 			}
 
 			helpers.NzLogInfo.Println("[DONE] zipping", "'"+db.Name+"'")
-
-			wg.Done()
 		}(wg, v.Database)
 	}
-
-	wg.Done()
 }
