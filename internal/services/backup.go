@@ -11,11 +11,9 @@ import (
 func Backup() {
 	var wg sync.WaitGroup
 
-	helpers.NzLogInfo.Println("Backup app invoked!")
 	wg.Add(1)
 	go backupAPP(&wg)
 
-	helpers.NzLogInfo.Println("Backup database invoked!")
 	wg.Add(1)
 	go backupDB(&wg)
 
