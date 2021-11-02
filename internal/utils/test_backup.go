@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/mdanialr/go-cron-backup/internal/arch"
@@ -15,6 +16,7 @@ import (
 
 // testBackup try to run backup and handle the goroutine
 func testBackup() bool {
+	var wg sync.WaitGroup
 	isPass := true
 
 	cAPP := make(chan bool)
@@ -26,18 +28,23 @@ func testBackup() bool {
 	if helpers.TCond.IsNoDB {
 		log.Println("[INFO] Excluding database from this test")
 	}
+
 	if !helpers.TCond.IsNoAPP {
-		go testBackupAPP(cAPP)
+		wg.Add(1)
+		go testBackupAPP(&wg, cAPP)
 		if !<-cAPP {
 			isPass = false
 		}
 	}
 	if !helpers.TCond.IsNoDB {
-		go testBackupDB(cDB)
+		wg.Add(1)
+		go testBackupDB(&wg, cDB)
 		if !<-cDB {
 			isPass = false
 		}
 	}
+
+	wg.Wait()
 	if !isPass {
 		os.Exit(1)
 	}
@@ -46,79 +53,93 @@ func testBackup() bool {
 }
 
 // testBackupAPP try to run backup on first database in config file
-func testBackupAPP(c chan bool) {
+func testBackupAPP(wg *sync.WaitGroup, c chan bool) {
+	defer wg.Done()
 	isPass := true
 
 	for _, v := range testConf.Backup.APP.Apps[0:testConf.Backup.APP.Sample] {
-		tAPP := v.App
-		backupDir := testConf.BackupAppDir + tAPP.DirName
-		if err := os.MkdirAll(backupDir, 0770); err != nil {
-			log.Fatalf("Failed to create dir for backup app in %v: %v\n", tAPP.AppDir, err)
-		}
+		wg.Add(1)
+		go func(wg *sync.WaitGroup, tAPP models.App) {
+			defer wg.Done()
 
-		log.Println("[START] zipping in", "'"+tAPP.AppDir+"'")
+			backupDir := testConf.BackupAppDir + tAPP.DirName
+			if err := os.MkdirAll(backupDir, 0770); err != nil {
+				log.Fatalf("Failed to create dir for backup app in %v: %v\n", tAPP.AppDir, err)
+			}
 
-		fmtTime := time.Now().Format("2006-Jan-02_Monday_15:04:05")
-		fName := "/" + fmtTime + ".zip"
-		zipName := testConf.BackupAppDir + tAPP.DirName + fName
+			log.Println("[START] zipping in", "'"+tAPP.AppDir+"'")
 
-		if err := arch.ZipDir(tAPP.AppDir, zipName); err != nil {
-			log.Fatalf("Failed zipping in %v: %v", tAPP.DirName, err)
-		}
-		fileToDelete.APPname = zipName
+			fmtTime := time.Now().Format("2006-Jan-02_Monday_15:04:05")
+			fName := "/" + fmtTime + ".zip"
+			zipName := testConf.BackupAppDir + tAPP.DirName + fName
 
-		log.Println("[DONE] zipping", "'"+tAPP.DirName+"'")
+			if err := arch.ZipDir(tAPP.AppDir, zipName); err != nil {
+				log.Fatalf("Failed zipping in %v: %v", tAPP.DirName, err)
+			}
+			fileToDelete.APPname = zipName
+
+			log.Println("[DONE] zipping", "'"+tAPP.DirName+"'")
+		}(wg, v.App)
 	}
 
 	c <- isPass
 }
 
 // testBackupDB try to run backup on first database in config file
-func testBackupDB(c chan bool) {
+func testBackupDB(wg *sync.WaitGroup, c chan bool) {
+	defer wg.Done()
+	var innerWG sync.WaitGroup
 	isPass := true
 
 	for _, v := range testConf.Backup.DB.Databases[0:testConf.Backup.DB.Sample] {
-		tDB := v.Database
-		backupDir := testConf.BackupDBDir + tDB.DirName
-		if err := os.MkdirAll(backupDir, 0770); err != nil {
-			log.Fatalf("Failed to create dir for backup app in %v: %v\n", tDB.DirName, err)
-		}
+		innerWG.Add(1)
+		go func(innerWG *sync.WaitGroup, tDB models.Database) {
+			defer innerWG.Done()
 
-		var dumpCmd, outName string
-		if tDB.T.MariaDB {
-			dumpCmd, outName = parseDumpingMariaDBCommand(tDB)
-		}
-		if tDB.T.PGsql {
-			dumpCmd, outName = parseDumpingPGCommand(tDB)
-		}
+			backupDir := testConf.BackupDBDir + tDB.DirName
+			if err := os.MkdirAll(backupDir, 0770); err != nil {
+				log.Fatalf("Failed to create dir for backup app in %v: %v\n", tDB.DirName, err)
+			}
 
-		// dumping database
-		log.Println("[START] dumping database", "'"+tDB.Name+"'")
-		if out, err := exec.Command("sh", "-c", dumpCmd).CombinedOutput(); err != nil {
-			log.Fatalln(err, string(out))
-			isPass = false
-		}
-		log.Println("[DONE] dumping", "'"+tDB.Name+"'")
+			var dumpCmd, outName string
+			if tDB.T.MariaDB {
+				dumpCmd, outName = parseDumpingMariaDBCommand(tDB)
+			}
+			if tDB.T.PGsql {
+				dumpCmd, outName = parseDumpingPGCommand(tDB)
+			}
 
-		// zipping dumped database
-		log.Println("[START] zipping dumped database", "'"+tDB.Name+"'")
+			// dumping database
+			log.Println("[START] dumping database", "'"+tDB.Name+"'")
+			if out, err := exec.Command("sh", "-c", dumpCmd).CombinedOutput(); err != nil {
+				log.Fatalln(err, string(out))
+				isPass = false
+			}
+			log.Println("[DONE] dumping", "'"+tDB.Name+"'")
 
-		fmtTime := time.Now().Format("2006-Jan-02_Monday_15:04:05")
-		fName := "/" + fmtTime + ".zip"
-		zipName := testConf.BackupDBDir + tDB.DirName + fName
+			// zipping dumped database
+			log.Println("[START] zipping dumped database", "'"+tDB.Name+"'")
 
-		if err := arch.Zip("/tmp/"+outName, zipName); err != nil {
-			log.Fatalf("Failed zipping %v: %v", outName, err)
-		}
-		fileToDelete.DBname = zipName
+			fmtTime := time.Now().Format("2006-Jan-02_Monday_15:04:05")
+			fName := "/" + fmtTime + ".zip"
+			zipName := testConf.BackupDBDir + tDB.DirName + fName
 
-		log.Println("[DONE] zipping", "'"+tDB.Name+"'")
+			if err := arch.Zip("/tmp/"+outName, zipName); err != nil {
+				log.Fatalf("Failed zipping %v: %v", outName, err)
+			}
+			fileToDelete.DBname = zipName
 
-		// delete dumped database from /tmp
-		if err := testDeleteDumpedFile(); err != nil {
-			log.Fatalln(err)
-			isPass = false
-		}
+			log.Println("[DONE] zipping", "'"+tDB.Name+"'")
+		}(&innerWG, v.Database)
+	}
+
+	// wait until all zipping the dumped databases done. Otherwise it will
+	// throw error because the dumped databases got cleaned before zipped.
+	innerWG.Wait()
+	// delete dumped database from /tmp
+	if err := testDeleteDumpedFile(); err != nil {
+		log.Fatalln(err)
+		isPass = false
 	}
 
 	c <- isPass
