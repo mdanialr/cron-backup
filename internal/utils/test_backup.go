@@ -15,12 +15,8 @@ import (
 )
 
 // testBackup try to run backup and handle the goroutine
-func testBackup() bool {
+func testBackup() {
 	var wg sync.WaitGroup
-	isPass := true
-
-	cAPP := make(chan bool)
-	cDB := make(chan bool)
 
 	if helpers.TCond.IsNoAPP {
 		log.Println("[INFO] Excluding app from this test")
@@ -31,36 +27,24 @@ func testBackup() bool {
 
 	if !helpers.TCond.IsNoAPP {
 		wg.Add(1)
-		go testBackupAPP(&wg, cAPP)
-		if !<-cAPP {
-			isPass = false
-		}
+		go testBackupAPP(&wg)
 	}
 	if !helpers.TCond.IsNoDB {
 		wg.Add(1)
-		go testBackupDB(&wg, cDB)
-		if !<-cDB {
-			isPass = false
-		}
+		go testBackupDB(&wg)
 	}
 
 	wg.Wait()
-	if !isPass {
-		os.Exit(1)
-	}
-
-	return isPass
 }
 
 // testBackupAPP try to run backup on first database in config file
-func testBackupAPP(wg *sync.WaitGroup, c chan bool) {
+func testBackupAPP(wg *sync.WaitGroup) {
 	defer wg.Done()
-	isPass := true
 
 	for _, v := range testConf.Backup.APP.Apps[0:testConf.Backup.APP.Sample] {
 		wg.Add(1)
-		go func(wg *sync.WaitGroup, tAPP models.App) {
-			defer wg.Done()
+		go func(innerWG *sync.WaitGroup, tAPP models.App) {
+			defer innerWG.Done()
 
 			backupDir := testConf.BackupAppDir + tAPP.DirName
 			if err := os.MkdirAll(backupDir, 0770); err != nil {
@@ -76,20 +60,17 @@ func testBackupAPP(wg *sync.WaitGroup, c chan bool) {
 			if err := arch.ZipDir(tAPP.AppDir, zipName); err != nil {
 				log.Fatalf("Failed zipping in %v: %v", tAPP.DirName, err)
 			}
-			fileToDelete.APPname = zipName
+			fileToDelete.APPname = append(fileToDelete.APPname, zipName)
 
 			log.Println("[DONE] zipping", "'"+tAPP.DirName+"'")
 		}(wg, v.App)
 	}
-
-	c <- isPass
 }
 
 // testBackupDB try to run backup on first database in config file
-func testBackupDB(wg *sync.WaitGroup, c chan bool) {
+func testBackupDB(wg *sync.WaitGroup) {
 	defer wg.Done()
 	var innerWG sync.WaitGroup
-	isPass := true
 
 	for _, v := range testConf.Backup.DB.Databases[0:testConf.Backup.DB.Sample] {
 		innerWG.Add(1)
@@ -113,7 +94,6 @@ func testBackupDB(wg *sync.WaitGroup, c chan bool) {
 			log.Println("[START] dumping database", "'"+tDB.Name+"'")
 			if out, err := exec.Command("sh", "-c", dumpCmd).CombinedOutput(); err != nil {
 				log.Fatalln(err, string(out))
-				isPass = false
 			}
 			log.Println("[DONE] dumping", "'"+tDB.Name+"'")
 
@@ -127,7 +107,7 @@ func testBackupDB(wg *sync.WaitGroup, c chan bool) {
 			if err := arch.Zip("/tmp/"+outName, zipName); err != nil {
 				log.Fatalf("Failed zipping %v: %v", outName, err)
 			}
-			fileToDelete.DBname = zipName
+			fileToDelete.DBname = append(fileToDelete.DBname, zipName)
 
 			log.Println("[DONE] zipping", "'"+tDB.Name+"'")
 		}(&innerWG, v.Database)
@@ -139,10 +119,7 @@ func testBackupDB(wg *sync.WaitGroup, c chan bool) {
 	// delete dumped database from /tmp
 	if err := testDeleteDumpedFile(); err != nil {
 		log.Fatalln(err)
-		isPass = false
 	}
-
-	c <- isPass
 }
 
 // parseDumpingMariaDBCommand combine all commands for dumping database

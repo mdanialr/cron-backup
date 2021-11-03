@@ -1,86 +1,74 @@
 package utils
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"strings"
+	"sync"
 
 	"github.com/mdanialr/go-cron-backup/internal/helpers"
 )
 
 // testDelete delete zip file that created by RunTest
-func testDelete() bool {
-	isPass := true
-
-	cAPP := make(chan bool)
-	cDB := make(chan bool)
-	cLOG := make(chan bool)
+func testDelete() {
+	var wg sync.WaitGroup
 
 	if helpers.TCond.IsDel {
 		if !helpers.TCond.IsNoAPP {
-			go testDeleteDir(cAPP, testConf.BackupAppDir)
-			if !<-cAPP {
-				isPass = false
-			}
+			wg.Add(1)
+			go testDeleteDir(&wg, testConf.BackupAppDir)
 		}
 
 		if !helpers.TCond.IsNoDB {
-			go testDeleteDir(cDB, testConf.BackupDBDir)
-			if !<-cDB {
-				isPass = false
-			}
+			wg.Add(1)
+			go testDeleteDir(&wg, testConf.BackupDBDir)
 		}
 
-		go testDeleteDir(cLOG, testConf.LogDir)
-		if !<-cLOG {
-			isPass = false
-		}
+		wg.Add(1)
+		go testDeleteDir(&wg, testConf.LogDir)
 	} else {
-		go testDeleteZipFile(cAPP, fileToDelete.APPname)
-		go testDeleteZipFile(cDB, fileToDelete.DBname)
-		if !<-cAPP || !<-cDB {
-			isPass = false
-		}
-		go func() {
-			cLOG <- true
-		}()
-	}
-	if !isPass {
-		os.Exit(1)
+		wg.Add(1)
+		go loopAndDelete(&wg, fileToDelete.APPname)
+		wg.Add(1)
+		go loopAndDelete(&wg, fileToDelete.DBname)
 	}
 
-	return isPass
+	// block this func until all delete process done
+	wg.Wait()
+}
+
+// loopAndDelete loop through all strings which are should be
+// the zip files, and delete all of them.
+func loopAndDelete(wg *sync.WaitGroup, files []string) {
+	defer wg.Done()
+	for _, file := range files {
+		fmt.Println(file)
+		wg.Add(1)
+		go testDeleteZipFile(wg, file)
+	}
 }
 
 // testDeleteDir delete dir and their contents recursively
-func testDeleteDir(c chan bool, dir string) {
-	isPass := true
+func testDeleteDir(wg *sync.WaitGroup, dir string) {
+	defer wg.Done()
 
 	log.Println("[START] deleting test backup in", "'"+dir+"'")
-
 	if err := os.RemoveAll(dir); err != nil {
-		isPass = false
-		log.Fatalln("[ERROR]", err)
+		log.Println("[ERROR]", err)
 	}
-
 	log.Println("[DONE] deleting test backup in", "'"+dir+"'")
-
-	c <- isPass
 }
 
 // testDeleteZipFile delete only zip file with given full path or dir
-func testDeleteZipFile(c chan bool, file string) {
-	isPass := true
+func testDeleteZipFile(wg *sync.WaitGroup, file string) {
+	defer wg.Done()
 
 	log.Println("[START] deleting zip file:", "'"+file+"'")
-
 	if err := os.Remove(file); err != nil {
-		log.Fatalln("[ERROR]", err)
+		log.Println("[ERROR]", err)
 	}
-
 	log.Println("[DONE] deleting zip file:", "'"+file+"'")
-
-	c <- isPass
 }
 
 // testDeleteDumpedFile delete dumped file in /tmp after zipping it
