@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -43,7 +42,6 @@ func testDelete() {
 func loopAndDelete(wg *sync.WaitGroup, files []string) {
 	defer wg.Done()
 	for _, file := range files {
-		fmt.Println(file)
 		wg.Add(1)
 		go testDeleteZipFile(wg, file)
 	}
