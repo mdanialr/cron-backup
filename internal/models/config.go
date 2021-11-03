@@ -17,7 +17,7 @@ type Apps []struct {
 type APP struct {
 	Apps   Apps `yaml:"apps"`
 	Retain int  `yaml:"days_number_to_retain"`
-	Sample int  `yaml:"test_sample"`
+	Sample int
 }
 
 type dbType struct {
@@ -43,7 +43,7 @@ type Databases []struct {
 type DB struct {
 	Databases Databases `yaml:"databases"`
 	Retain    int       `yaml:"days_number_to_retain"`
-	Sample    int       `yaml:"test_sample"`
+	Sample    int
 }
 
 type Backup struct {

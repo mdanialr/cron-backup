@@ -1,10 +1,12 @@
 package utils
 
 import (
+	"flag"
 	"io/ioutil"
 	"log"
 	"os"
 
+	"github.com/mdanialr/go-cron-backup/internal/helpers"
 	"gopkg.in/yaml.v2"
 )
 
@@ -58,6 +60,7 @@ func testCheckConfig() bool {
 		os.Exit(1)
 	}
 
+	AssignSampleFromFlag()
 	testConf.SanitizeLogDir()
 	testConf.SanitizeRootDir()
 	testConf.SanitizeAppDir()
@@ -66,4 +69,30 @@ func testCheckConfig() bool {
 	testConf.SanitizeAndSetupSample()
 
 	return isPass
+}
+
+// AssignSampleFromFlag assign config sample's value from
+// cli args (flag).
+func AssignSampleFromFlag() {
+	if !isFlagExist("sam-app") {
+		helpers.TCond.Sapp = helpers.TCond.Sample
+	}
+	if !isFlagExist("sam-db") {
+		helpers.TCond.Sdb = helpers.TCond.Sample
+	}
+
+	testConf.Backup.APP.Sample = helpers.TCond.Sapp
+	testConf.Backup.DB.Sample = helpers.TCond.Sdb
+}
+
+// isFlagExist check if a flag is set or not.
+func isFlagExist(name string) bool {
+	var founded bool
+	flag.Visit(func(f *flag.Flag) {
+		if f.Name == name {
+			founded = true
+		}
+	})
+
+	return founded
 }

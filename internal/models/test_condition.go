@@ -5,4 +5,7 @@ type TCond struct {
 	IsNoAPP bool
 	IsNoDB  bool
 	IsDel   bool
+	Sample  int
+	Sdb     int
+	Sapp    int
 }
