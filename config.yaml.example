@@ -1,9 +1,9 @@
 log_dir: "/full/path/to/dir"
 backup:
   root_dir: "/full/path/to/dir"
-  days_number_to_retain: 6
+  max_days_to_retain: 6
   database:
-    days_number_to_retain:
+    max_days_to_retain:
     databases:
       - database:
           type: {pg/mdb}
@@ -22,7 +22,7 @@ backup:
           dbpass: db_pwd
           backup_dir_name: db-backupname
   app:
-    days_number_to_retain:
+    max_days_to_retain:
     apps:
       - appfile:
           app_dir: "/full/path/to/app/dir"

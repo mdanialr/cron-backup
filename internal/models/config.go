@@ -16,7 +16,7 @@ type Apps []struct {
 
 type APP struct {
 	Apps   Apps `yaml:"apps"`
-	Retain int  `yaml:"days_number_to_retain"`
+	Retain int  `yaml:"max_days_to_retain"`
 	Sample int
 }
 
@@ -42,14 +42,14 @@ type Databases []struct {
 
 type DB struct {
 	Databases Databases `yaml:"databases"`
-	Retain    int       `yaml:"days_number_to_retain"`
+	Retain    int       `yaml:"max_days_to_retain"`
 	Sample    int
 }
 
 type Backup struct {
 	DB      DB     `yaml:"database"`
 	APP     APP    `yaml:"app"`
-	Retain  int    `yaml:"days_number_to_retain"`
+	Retain  int    `yaml:"max_days_to_retain"`
 	RootDir string `yaml:"root_dir"`
 }
 
