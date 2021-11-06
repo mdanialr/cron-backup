@@ -1,6 +1,7 @@
 package services
 
 import (
+	"math"
 	"os"
 	"strings"
 	"time"
@@ -12,7 +13,6 @@ import (
 // its retain days
 func deleteOldBackup(dir string, retainDay int) error {
 	helpers.NzLogInfo.Println("[START] deleting old backup in:", "'"+dir+"'")
-	currentDay := time.Now().Day()
 
 	files, err := os.ReadDir(dir)
 	if err != nil {
@@ -25,8 +25,8 @@ func deleteOldBackup(dir string, retainDay int) error {
 			return err
 		}
 
-		day := fInf.ModTime().Day()
-		if day < (currentDay - retainDay) {
+		sinceCreate := math.Round(time.Since(fInf.ModTime()).Hours())
+		if int(sinceCreate) > ((retainDay * 24) - 1) {
 			if err := os.Remove(dir + "/" + fl.Name()); err != nil {
 				return err
 			}
