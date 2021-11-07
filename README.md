@@ -2,10 +2,13 @@
 Little app to backup multiple databases and apps/folder/dir with zip archive written in Go.
 
 # Features
-* Backup multiple app or folder or dir.
-* Backup multiple Postgresql database.
-* Custom number of days to retain old backup otherwise will be deleted.
+* Backup multiple folder app or dir.
+* Follow and walkthrough `symlink`.
+* Backup multiple databases. supported __PostgreSQL__ & __MariaDB__.
+* Custom max days to retain old backup before deleted.
 * Backup multiple app and database concurrently at once.
+* Pack the backup using ZIP archive (*deflate*).
+* No root privileges is needed. (*as long as the user running this app has sufficient privileges*).
 
 
 # Installation
@@ -42,20 +45,28 @@ $ ./build/go-cron-backup -test -d
 $ ./build/go-cron-backup
 ```
 
-8. (optional) Create cronjob to run this app.
+8. (optional) Create a cronjob to run this app.
 > Example
 ```sh
 @daily cd /path/to/repo/go-cron-backup && ./build/go-cron-backup
 ```
 
-# Notes and Suggestions
-* Run the app with `sudo` privileges, since many app are reside in dir like `/var/www/*` need `sudo` privileges to do something with that dir, and this is also a mandatory to backup Postgresql database since in the app **'sudo -u postgres ...'** is used to do the trick.
-* `-test` argument is used to test the app. (*only delete the zip files that created by this test*)
-* `-d` argument is used to **delete all directories** in backup and log dir recursively including every files in that directories, so please be careful with this argument. (**_never use this argument when you have already run the app in production use, since this will delete all of your backuped files_**)
-* `-no-app` argument is used to exclude app from this testing.
-* `-no-db` argument is used to exclude db from this testing.
+# Arguments
+* `-test` : test the app. (*will only delete the zip files that created by this test*).
+* `-d` : **delete** backup and log folder recursively including every files in that directoris. so be careful with this argument. (**_never use this argument when you have already run the app in production, otherwise this will delete all of your backup files in that directory_**)
+* `-no-app` : exclude app from this testing.
+* `-no-db` : exclude db from this testing.
+* `-sample` : the number of sample to be tested for both app and db.
+* `-sam-app` : specifically set the number of sample for app.
+* `-sam-db` : specifically set the number of sample for db.
+
+
+# Notes
+* Both `-sam-app` and `-sam-db` would uses value from `-sample` if not specified.
+* `-sample` default value is 1 if not specified or overridden.
+* Tested in linux. since this app only uses stdlib then this should also work with any other golang supported platform.
 * See log file to check if there are some errors or successfull backup. (in **go-cron-backup--log**)
-* Run the app when you are in the root path of the repo, otherwise you will see error regarding the config file is not found.
+* Run this app when you are in the root path of the repo, otherwise you will see error regarding the config file is not found.
 
 # License
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE "LICENSE") file for details.
