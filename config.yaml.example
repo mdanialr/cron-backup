@@ -13,6 +13,7 @@ backup:
           dbuser: db_usr
           dbpass: db_pwd
           backup_dir_name: db-backupname
+          opt_params: "--skip-lock-tables --single-transaction"
       - database:
           type: {pg/mdb}
           hostname: ip_to_server
