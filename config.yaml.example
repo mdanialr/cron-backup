@@ -13,6 +13,7 @@ backup:
           dbuser: db_usr
           dbpass: db_pwd
           backup_dir_name: db-backupname
+          # this opt_params can only be used for mariadb (mdb)
           opt_params: "--skip-lock-tables --single-transaction"
       - database:
           type: {pg/mdb}
