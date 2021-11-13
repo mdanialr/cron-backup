@@ -129,6 +129,7 @@ func parseDumpingMariaDBCommand(db models.Database) (string, string) {
 	port := "-P " + strconv.Itoa(db.Port)
 	usr := "-u " + db.Usr
 	pwd := "-p" + db.Pwd
+	opt_params := db.OptParams
 	outName := "dump_" + db.Name
 	cmdSeries := []string{
 		cmd,
@@ -136,6 +137,7 @@ func parseDumpingMariaDBCommand(db models.Database) (string, string) {
 		port,
 		usr,
 		pwd,
+		opt_params,
 		">",
 		outName,
 	}
