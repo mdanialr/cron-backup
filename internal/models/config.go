@@ -26,14 +26,15 @@ type dbType struct {
 }
 
 type Database struct {
-	T       dbType
-	Type    string `yaml:"type"`
-	Host    string `yaml:"hostname"`
-	Port    int    `yaml:"port"`
-	Name    string `yaml:"dbname"`
-	Usr     string `yaml:"dbuser"`
-	Pwd     string `yaml:"dbpass"`
-	DirName string `yaml:"backup_dir_name"`
+	T         dbType
+	Type      string `yaml:"type"`
+	Host      string `yaml:"hostname"`
+	Port      int    `yaml:"port"`
+	Name      string `yaml:"dbname"`
+	Usr       string `yaml:"dbuser"`
+	Pwd       string `yaml:"dbpass"`
+	DirName   string `yaml:"backup_dir_name"`
+	OptParams string `yaml:"opt_params"`
 }
 
 type Databases []struct {
