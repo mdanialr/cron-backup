@@ -14,37 +14,54 @@ import (
 func backupAPP(wg *sync.WaitGroup) {
 	defer wg.Done()
 
+	// initialize number of jobs and the job channel
+	numJobs := len(helpers.Conf.Backup.APP.Apps)
+	jobChan := make(chan models.App, numJobs)
+
+	// start workers.
+	for w := 1; w <= 2; w++ {
+		go appWorker(wg, jobChan)
+	}
+
+	// send jobs before closing the sending channel.
 	for _, v := range helpers.Conf.Backup.APP.Apps {
-		backupDir := helpers.Conf.BackupAppDir + v.App.DirName
+		jobChan <- v.App
+	}
+	close(jobChan)
+}
+
+// dbWorker worker function to do the job which is
+// deleting old backup, and zipping app dir or folder.
+func appWorker(wg *sync.WaitGroup, jobChan <-chan models.App) {
+	// listen to job channel.
+	for app := range jobChan {
+		wg.Add(1)
+
+		// make sure target backup dir is exist by creating it.
+		backupDir := helpers.Conf.BackupAppDir + app.DirName
 		if err := makeSureDirExists(backupDir); err != nil {
-			log.Fatalf("Failed to create dir for backup app in %v: %v\n", v.App.AppDir, err)
+			log.Fatalf("Failed to create dir for backup app in %v: %v\n", app.AppDir, err)
 		}
 
-		// delete old backup
-		wg.Add(1)
-		go func(wg *sync.WaitGroup) {
-			defer wg.Done()
-			if err := deleteOldBackup(backupDir, helpers.Conf.Backup.APP.Retain); err != nil {
-				helpers.NzLogError.Println(err)
-			}
-		}(wg)
+		// delete old backup, according to maximum retain days
+		// in config.
+		if err := deleteOldBackup(backupDir, helpers.Conf.Backup.APP.Retain); err != nil {
+			helpers.NzLogError.Println(err)
+		}
 
-		// goroutine to separate zip proccess from main thread
-		wg.Add(1)
-		go func(wg *sync.WaitGroup, app models.App) {
-			defer wg.Done()
+		// zipping app directory or folders.
+		helpers.NzLogInfo.Println("[START] zipping in", "'"+app.AppDir+"'")
 
-			helpers.NzLogInfo.Println("[START] zipping in", "'"+app.AppDir+"'")
+		fmtTime := time.Now().Format("2006-Jan-02_Monday_15:04:05")
+		fName := "/" + fmtTime + ".zip"
+		zipName := helpers.Conf.BackupAppDir + app.DirName + fName
 
-			fmtTime := time.Now().Format("2006-Jan-02_Monday_15:04:05")
-			fName := "/" + fmtTime + ".zip"
-			zipName := helpers.Conf.BackupAppDir + app.DirName + fName
+		if err := arch.ZipDir(app.AppDir, zipName); err != nil {
+			helpers.NzLogError.Printf("Failed zipping in %v: %v", app.DirName, err)
+		}
 
-			if err := arch.ZipDir(app.AppDir, zipName); err != nil {
-				helpers.NzLogError.Printf("Failed zipping in %v: %v", app.DirName, err)
-			}
+		helpers.NzLogInfo.Println("[DONE] zipping", "'"+app.DirName+"'")
 
-			helpers.NzLogInfo.Println("[DONE] zipping", "'"+app.DirName+"'")
-		}(wg, v.App)
+		wg.Done()
 	}
 }
