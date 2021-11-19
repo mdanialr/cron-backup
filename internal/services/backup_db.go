@@ -21,7 +21,7 @@ func backupDB(wg *sync.WaitGroup) {
 	doneChan := make(chan int, numJobs)
 
 	// start workers.
-	for w := 1; w <= 2; w++ {
+	for w := 1; w <= helpers.Conf.Backup.DB.MaxWorker; w++ {
 		go dbWorker(jobChan, doneChan)
 	}
 

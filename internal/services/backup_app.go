@@ -20,7 +20,7 @@ func backupAPP(wg *sync.WaitGroup) {
 	doneChan := make(chan int, numJobs)
 
 	// start workers.
-	for w := 1; w <= 2; w++ {
+	for w := 1; w <= helpers.Conf.Backup.APP.MaxWorker; w++ {
 		go appWorker(jobChan, doneChan)
 	}
 

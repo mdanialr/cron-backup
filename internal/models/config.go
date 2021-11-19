@@ -15,9 +15,10 @@ type Apps []struct {
 }
 
 type APP struct {
-	Apps   Apps `yaml:"apps"`
-	Retain int  `yaml:"max_days_to_retain"`
-	Sample int
+	Apps      Apps `yaml:"apps"`
+	Retain    int  `yaml:"max_days_to_retain"`
+	MaxWorker int  `yaml:"max_worker"`
+	Sample    int
 }
 
 type dbType struct {
@@ -44,6 +45,7 @@ type Databases []struct {
 type DB struct {
 	Databases Databases `yaml:"databases"`
 	Retain    int       `yaml:"max_days_to_retain"`
+	MaxWorker int       `yaml:"max_worker"`
 	Sample    int
 }
 
@@ -166,5 +168,15 @@ func (c *Config) SanitizeAndSetupSample() {
 	}
 	if c.Backup.DB.Sample > len(c.Backup.DB.Databases) {
 		c.Backup.DB.Sample = len(c.Backup.DB.Databases)
+	}
+}
+
+// SanitizeMaxWorker give default value to empty max_worker.
+func (c *Config) SanitizeMaxWorker() {
+	if c.Backup.APP.MaxWorker == 0 {
+		c.Backup.APP.MaxWorker = 1
+	}
+	if c.Backup.DB.MaxWorker == 0 {
+		c.Backup.DB.MaxWorker = 1
 	}
 }

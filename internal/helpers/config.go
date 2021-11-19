@@ -32,4 +32,5 @@ func LoadConfigFromFile() {
 	Conf.SetupDBType()
 	Conf.SanitizeAndCheckDB()
 	Conf.SanitizeAndSetupSample()
+	Conf.SanitizeMaxWorker()
 }
