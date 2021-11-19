@@ -9,6 +9,7 @@ Little app to backup multiple databases and apps/folder/dir with zip archive wri
 * Backup multiple app and database concurrently at once.
 * Pack the backup using ZIP archive (*deflate*).
 * No root privileges is needed. (*as long as the user running this app has sufficient privileges*).
+* Throttle CPU usage by setting up max worker.
 
 
 # Installation

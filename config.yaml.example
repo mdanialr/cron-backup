@@ -4,6 +4,7 @@ backup:
   max_days_to_retain: 6
   database:
     max_days_to_retain:
+    max_worker: 2 # default to 1
     databases:
       - database:
           type: {pg/mdb}
@@ -25,6 +26,7 @@ backup:
           backup_dir_name: db-backupname
   app:
     max_days_to_retain:
+    max_worker: 2 # default to 1
     apps:
       - appfile:
           app_dir: "/full/path/to/app/dir"
