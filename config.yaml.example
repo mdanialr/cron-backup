@@ -7,8 +7,8 @@ backup:
     databases:
       - database:
           type: {pg/mdb}
-          hostname: ip_to_server
-          port: dbport in integer
+          hostname: ip_to_server # default to localhost
+          port: dbport in integer # default to 5432, 3306 for pg and mdb respectively
           dbname: db_name
           dbuser: db_usr
           dbpass: db_pwd
@@ -17,8 +17,8 @@ backup:
           opt_params: "--skip-lock-tables --single-transaction"
       - database:
           type: {pg/mdb}
-          hostname: ip_to_server
-          port: dbport in integer
+          hostname: ip_to_server # default to localhost
+          port: dbport in integer # default to 5432, 3306 for pg and mdb respectively
           dbname: db_name
           dbuser: db_usr
           dbpass: db_pwd
