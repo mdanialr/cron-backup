@@ -18,10 +18,11 @@ func backupDB(wg *sync.WaitGroup) {
 	// initialize number of jobs and the job channel
 	numJobs := len(helpers.Conf.Backup.DB.Databases)
 	jobChan := make(chan models.Database, numJobs)
+	doneChan := make(chan int, numJobs)
 
 	// start workers.
 	for w := 1; w <= 2; w++ {
-		go dbWorker(wg, jobChan)
+		go dbWorker(jobChan, doneChan)
 	}
 
 	// send jobs.
@@ -29,14 +30,20 @@ func backupDB(wg *sync.WaitGroup) {
 		jobChan <- v.Database
 	}
 	close(jobChan)
+
+	for range helpers.Conf.Backup.DB.Databases {
+		// block until all jobs is done.
+		<-doneChan
+	}
 }
 
 // dbWorker worker function to do the job which is
 // deleting old backup, dumping database, and zip them.
-func dbWorker(wg *sync.WaitGroup, jobChan <-chan models.Database) {
+func dbWorker(jobChan <-chan models.Database, doneChan chan<- int) {
 	// listen to job channel.
 	for db := range jobChan {
-		wg.Add(1)
+		// just send whatever number to channel.
+		doneChan <- 1
 
 		// make sure target backup dir is exist by creating it.
 		backupDir := helpers.Conf.BackupDBDir + db.DirName
@@ -78,7 +85,5 @@ func dbWorker(wg *sync.WaitGroup, jobChan <-chan models.Database) {
 		}
 
 		helpers.NzLogInfo.Println("[DONE] zipping", "'"+db.Name+"'")
-
-		wg.Done()
 	}
 }

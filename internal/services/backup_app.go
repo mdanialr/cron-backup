@@ -17,10 +17,11 @@ func backupAPP(wg *sync.WaitGroup) {
 	// initialize number of jobs and the job channel
 	numJobs := len(helpers.Conf.Backup.APP.Apps)
 	jobChan := make(chan models.App, numJobs)
+	doneChan := make(chan int, numJobs)
 
 	// start workers.
 	for w := 1; w <= 2; w++ {
-		go appWorker(wg, jobChan)
+		go appWorker(jobChan, doneChan)
 	}
 
 	// send jobs before closing the sending channel.
@@ -28,14 +29,20 @@ func backupAPP(wg *sync.WaitGroup) {
 		jobChan <- v.App
 	}
 	close(jobChan)
+
+	for range helpers.Conf.Backup.APP.Apps {
+		// block until all jobs is done.
+		<-doneChan
+	}
 }
 
 // dbWorker worker function to do the job which is
 // deleting old backup, and zipping app dir or folder.
-func appWorker(wg *sync.WaitGroup, jobChan <-chan models.App) {
+func appWorker(jobChan <-chan models.App, doneChan chan<- int) {
 	// listen to job channel.
 	for app := range jobChan {
-		wg.Add(1)
+		// just send whatever number to channel.
+		doneChan <- 1
 
 		// make sure target backup dir is exist by creating it.
 		backupDir := helpers.Conf.BackupAppDir + app.DirName
@@ -61,7 +68,5 @@ func appWorker(wg *sync.WaitGroup, jobChan <-chan models.App) {
 		}
 
 		helpers.NzLogInfo.Println("[DONE] zipping", "'"+app.DirName+"'")
-
-		wg.Done()
 	}
 }
