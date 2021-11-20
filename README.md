@@ -63,8 +63,7 @@ $ ./build/go-cron-backup
 
 
 # Notes
-* Both `-sam-app` and `-sam-db` would uses value from `-sample` if not specified.
-* `-sample` default value is 1 if not specified or overridden.
+* `-sample`, `-sam-app` & `-sam-db` default value is 1 if not specified or overridden.
 * Tested in linux. since this app only uses stdlib then this should also work with any other golang supported platform.
 * See log file to check if there are some errors or successfull backup. (in **go-cron-backup--log**)
 * Run this app when you are in the root path of the repo, otherwise you will see error regarding the config file is not found.
