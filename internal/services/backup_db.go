@@ -42,9 +42,6 @@ func backupDB(wg *sync.WaitGroup) {
 func dbWorker(jobChan <-chan models.Database, doneChan chan<- int) {
 	// listen to job channel.
 	for db := range jobChan {
-		// just send whatever number to channel.
-		doneChan <- 1
-
 		// make sure target backup dir is exist by creating it.
 		backupDir := helpers.Conf.BackupDBDir + db.DirName
 		if err := makeSureDirExists(backupDir); err != nil {
@@ -85,5 +82,8 @@ func dbWorker(jobChan <-chan models.Database, doneChan chan<- int) {
 		}
 
 		helpers.NzLogInfo.Println("[DONE] zipping", "'"+db.Name+"'")
+
+		// just send whatever number to channel.
+		doneChan <- 1
 	}
 }

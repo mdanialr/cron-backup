@@ -41,9 +41,6 @@ func backupAPP(wg *sync.WaitGroup) {
 func appWorker(jobChan <-chan models.App, doneChan chan<- int) {
 	// listen to job channel.
 	for app := range jobChan {
-		// just send whatever number to channel.
-		doneChan <- 1
-
 		// make sure target backup dir is exist by creating it.
 		backupDir := helpers.Conf.BackupAppDir + app.DirName
 		if err := makeSureDirExists(backupDir); err != nil {
@@ -68,5 +65,8 @@ func appWorker(jobChan <-chan models.App, doneChan chan<- int) {
 		}
 
 		helpers.NzLogInfo.Println("[DONE] zipping", "'"+app.DirName+"'")
+
+		// just send whatever number to channel.
+		doneChan <- 1
 	}
 }
