@@ -14,41 +14,41 @@ Little app to backup multiple databases and apps/folder/dir with zip archive wri
 
 # Installation
 1. Clone the repo.
-```sh
-$ git clone https://github.com/mdanialr/go-cron-backup.git
+```bash
+git clone https://github.com/mdanialr/go-cron-backup.git
 ```
 > assuming that you are in the root path of the repo.
 2. Get dependencies.
-```sh
-$ go mod tidy
+```bash
+go mod tidy
 ```
 
 3. Create new config file.
-```sh
-$ cp config.yaml.example config.yaml
+```bash
+cp config.yaml.example config.yaml
 ```
 
 4. Fill in the config.yaml file as needed.
 
 5. Build the project.
-```sh
-$ go build -o build/go-cron-backup main.go
+```bash
+go build -o build/go-cron-backup main.go
 ```
 
 6. Run a test to check if the app is working properly.
-```sh
-$ ./build/go-cron-backup -test -d
+```bash
+./build/go-cron-backup -test -d
 ```
 > If there is no error message in terminal then go to next step.
 
 7. Run the app.
-```sh
-$ ./build/go-cron-backup
+```bash
+./build/go-cron-backup
 ```
 
 8. (optional) Create a cronjob to run this app.
 > Example
-```sh
+```bash
 @daily cd /path/to/repo/go-cron-backup && ./build/go-cron-backup
 ```
 
@@ -65,7 +65,7 @@ $ ./build/go-cron-backup
 # Notes
 * `-sample`, `-sam-app` & `-sam-db` default value is 1 if not specified or overridden.
 * Tested in linux. since this app only uses stdlib then this should also work with any other golang supported platform.
-* See log file to check if there are some errors or successfull backup. (in **go-cron-backup--log**)
+* See log file to check if there are some errors or successful backup. (in **go-cron-backup--log**)
 * Run this app when you are in the root path of the repo, otherwise you will see error regarding the config file is not found.
 
 # License
