@@ -56,6 +56,9 @@ func dbWorker(jobChan <-chan models.Database, doneChan chan<- int) {
 		if db.T.PGsql {
 			dumpCmd, outName = parseDumpingPGCommand(db)
 		}
+		if db.T.MySQL {
+			dumpCmd, outName = parseDumpingMysqlCommand(db)
+		}
 
 		// delete old backup, according to maximum retain days
 		// in config.

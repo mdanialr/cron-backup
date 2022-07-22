@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -89,6 +90,9 @@ func testBackupDB(wg *sync.WaitGroup) {
 			if tDB.T.PGsql {
 				dumpCmd, outName = parseDumpingPGCommand(tDB)
 			}
+			if tDB.T.MySQL {
+				dumpCmd, outName = parseDumpingMysqlCommand(tDB)
+			}
 
 			// dumping database
 			log.Println("[START] dumping database", "'"+tDB.Name+"'")
@@ -120,6 +124,14 @@ func testBackupDB(wg *sync.WaitGroup) {
 	if err := testDeleteDumpedFile(); err != nil {
 		log.Fatalln(err)
 	}
+}
+
+// parseDumpingMysqlCommand combine all commands for dumping database
+func parseDumpingMysqlCommand(db models.Database) (string, string) {
+	cmd := fmt.Sprintf("mysqldump -h %s -P %d -u %s -p%s %s %s", db.Host, db.Port, db.Usr, db.Pwd, db.Name, db.OptParams)
+	outName := fmt.Sprintf("dump_%s_%s", db.Name, time.Now().Format("2006-01-02_15-04-05"))
+	cmd = fmt.Sprintf("%s > %s", cmd, outName)
+	return fmt.Sprintf("cd /tmp; %s", cmd), outName
 }
 
 // parseDumpingMariaDBCommand combine all commands for dumping database

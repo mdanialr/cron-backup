@@ -4,12 +4,13 @@ Little app to backup multiple databases and apps/folder/dir with zip archive wri
 # Features
 * Backup multiple folder app or dir.
 * Follow and walkthrough `symlink`.
-* Backup multiple databases. supported __PostgreSQL__ & __MariaDB__.
+* Backup multiple databases. support __PostgreSQL__, __MariaDB__ & __MySQL__ database.
 * Custom max days to retain old backup before deleted.
 * Backup multiple app and database concurrently at once.
 * Pack the backup using ZIP archive (*deflate*).
 * No root privileges is needed. (*as long as the user running this app has sufficient privileges*).
 * Throttle CPU usage by setting up max worker.
+* ZIP archive without any external dependency (*using Go's __stdlib__* only).
 
 
 # Installation

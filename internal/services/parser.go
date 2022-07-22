@@ -1,11 +1,21 @@
 package services
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/mdanialr/go-cron-backup/internal/models"
 )
+
+// parseDumpingMysqlCommand combine all commands for dumping database
+func parseDumpingMysqlCommand(db models.Database) (string, string) {
+	cmd := fmt.Sprintf("mysqldump -h %s -P %d -u %s -p%s %s %s", db.Host, db.Port, db.Usr, db.Pwd, db.Name, db.OptParams)
+	outName := fmt.Sprintf("dump_%s_%s", db.Name, time.Now().Format("2006-01-02_15-04-05"))
+	cmd = fmt.Sprintf("%s > %s", cmd, outName)
+	return fmt.Sprintf("cd /tmp; %s", cmd), outName
+}
 
 // parseDumpingMariaDBCommand combine all commands for dumping database
 func parseDumpingMariaDBCommand(db models.Database) (string, string) {

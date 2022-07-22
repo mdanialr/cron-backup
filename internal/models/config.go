@@ -24,6 +24,7 @@ type APP struct {
 type dbType struct {
 	PGsql   bool
 	MariaDB bool
+	MySQL   bool
 }
 
 type Database struct {
@@ -131,6 +132,9 @@ func (c *Config) SanitizeAndCheckDB() error {
 			if db.T.MariaDB {
 				db.Port = 3306
 			}
+			if db.T.MySQL {
+				db.Port = 3306
+			}
 			if db.T.PGsql {
 				db.Port = 5432
 			}
@@ -148,8 +152,11 @@ func (c *Config) SetupDBType() {
 		if strings.HasPrefix(l, "pg") {
 			v.Database.T.PGsql = true
 		}
-		if strings.HasPrefix(l, "my") || strings.HasPrefix(l, "md") {
+		if strings.HasPrefix(l, "md") {
 			v.Database.T.MariaDB = true
+		}
+		if strings.HasPrefix(l, "my") {
+			v.Database.T.MySQL = true
 		}
 	}
 }

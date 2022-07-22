@@ -7,17 +7,17 @@ backup:
     max_worker: 2 # default to 1
     databases:
       - database:
-          type: {pg/mdb}
+          type: {pg/mdb/my}
           hostname: ip_to_server # default to localhost
           port: dbport in integer # default to 5432, 3306 for pg and mdb respectively
           dbname: db_name
           dbuser: db_usr
           dbpass: db_pwd
           backup_dir_name: db-backupname
-          # this opt_params can only be used for mariadb (mdb)
+          # this opt_params can only be used for mariadb & mysql (mdb/my)
           opt_params: "--skip-lock-tables --single-transaction"
       - database:
-          type: {pg/mdb}
+          type: {pg/mdb/my}
           hostname: ip_to_server # default to localhost
           port: dbport in integer # default to 5432, 3306 for pg and mdb respectively
           dbname: db_name
