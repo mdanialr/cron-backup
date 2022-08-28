@@ -1,0 +1,31 @@
+root: "/full/path/to/dir"
+max_days: 6
+db:
+  max_days:
+  max_worker: 2 # default to 1
+  databases:
+    - type: {pg/mdb/my}
+      hostname: ip_to_server # default to localhost
+      port: dbport in integer # default to 5432, 3306 for pg and mdb respectively
+      name: db_name
+      user: db_usr
+      pass: db_pwd
+      backup_name: db-backupname
+      # this opt_params can only be used for mariadb & mysql (mdb/my)
+      opt_params: "--skip-lock-tables --single-transaction"
+    - type: { pg/mdb/my }
+      docker: container_name # backup a database that's inside a docker container
+      hostname: ip_to_server # default to localhost
+      port: dbport in integer # default to 5432, 3306 for pg and mdb respectively
+      name: db_name
+      user: db_usr
+      pass: db_pwd
+      backup_name: db-backupname
+app:
+  max_days:
+  max_worker: 2 # default to 1
+  apps:
+    - dir: "/full/path/to/app/dir"
+      name: someappname
+    - dir: "/full/path/to/another/app/dir"
+      name: someanotherappname
