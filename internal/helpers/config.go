@@ -12,7 +12,7 @@ var Conf *models.Config
 
 // LoadConfigFromFile load config.yaml file and assign it to Config
 func LoadConfigFromFile() {
-	yamlFile, err := ioutil.ReadFile("config.yaml")
+	yamlFile, err := ioutil.ReadFile("app.yml")
 	if err != nil {
 		errMsg := "Error when load yaml file; " + err.Error()
 		log.Fatalln(errMsg)
