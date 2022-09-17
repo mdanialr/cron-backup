@@ -1,8 +1,9 @@
-package config
+package config_test
 
 import (
 	"testing"
 
+	"github.com/mdanialr/go-cron-backup/pkg/config"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -29,7 +30,7 @@ func TestSetupDefault(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			err := SetupDefault(tc.sample)
+			err := config.SetupDefault(tc.sample)
 
 			switch tc.wantErr {
 			case true:
@@ -67,7 +68,7 @@ func TestInitConfig(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			_, err := InitConfig(tc.sample)
+			_, err := config.InitConfig(tc.sample)
 
 			switch tc.wantErr {
 			case true:
