@@ -84,7 +84,7 @@ func TestDatabase_buildCMD(t *testing.T) {
 		{
 			name:   "Given 'type' pg empty 'host' and 'port' also 'name' sample should has expected generated cmd",
 			sample: Database{Type: "pg", Name: "sample"},
-			expect: "pg_dump postgresql://postgres:@localhost:5432/sample?",
+			expect: "pg_dump postgresql://postgres:@localhost:5432/sample",
 		},
 		{
 			name:   "Given 'type' my empty 'host' and 'pass' but has 'port' 3376 also 'name' db should has expected generated cmd",
@@ -99,7 +99,7 @@ func TestDatabase_buildCMD(t *testing.T) {
 		{
 			name:   "Given sample 'docker' is not empty should has prefix `docker exec -t docker-name`, then followed by the generated cmd",
 			sample: Database{Type: "pg", Name: "sample", Docker: "docker-name"},
-			expect: "docker exec -t docker-name pg_dump postgresql://postgres:@localhost:5432/sample?",
+			expect: "docker exec -t docker-name pg_dump postgresql://postgres:@localhost:5432/sample",
 		},
 	}
 
