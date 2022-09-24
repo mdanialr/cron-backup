@@ -2,8 +2,10 @@ package config
 
 import (
 	"fmt"
-	"github.com/spf13/viper"
 	"log"
+	"strings"
+
+	"github.com/spf13/viper"
 )
 
 // AppConfig a bag containing all necessary things for this app.
@@ -32,7 +34,9 @@ func SetupDefault(v *viper.Viper) error {
 	if !v.IsSet("root") {
 		return fmt.Errorf("`root` for this app root directories is required")
 	}
+	v.Set("root", strings.TrimSuffix(v.GetString("root"), "/")) // remove trailing slice if any
 	v.SetDefault("max_days", 6)
+	v.Set("log", fmt.Sprintf("%s/log", v.GetString("root")))
 
 	// databases
 	v.SetDefault("db.max_worker", 1)
