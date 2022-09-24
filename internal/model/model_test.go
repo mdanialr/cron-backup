@@ -112,6 +112,62 @@ func TestDatabase_buildCMD(t *testing.T) {
 	}
 }
 
+func TestDatabase_SetDir(t *testing.T) {
+	testCases := []struct {
+		name   string
+		sample Database
+		root   string
+		expect string
+	}{
+		{
+			name:   "Given empty root and backup name sample, dir should set to /sample as the directory name",
+			sample: Database{BackupName: "sample"},
+			expect: "/sample",
+		},
+		{
+			name:   "Given root /tmp/database and backup name sample, dir should set to /tmp/database/sample as the directory name",
+			sample: Database{BackupName: "sample"},
+			root:   "/tmp/database",
+			expect: "/tmp/database/sample",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.sample.SetDir(tc.root)
+			assert.Equal(t, tc.expect, tc.sample.Dir)
+		})
+	}
+}
+
+func TestApp_SetStoreDir(t *testing.T) {
+	testCases := []struct {
+		name   string
+		sample App
+		root   string
+		expect string
+	}{
+		{
+			name:   "Given empty root and backup name sample, store dir should set to /sample as the directory name",
+			sample: App{Name: "sample"},
+			expect: "/sample",
+		},
+		{
+			name:   "Given root /tmp/app and backup name sample, store dir should set to /tmp/app/sample as the directory name",
+			sample: App{Name: "sample"},
+			root:   "/tmp/app",
+			expect: "/tmp/app/sample",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.sample.SetStoreDir(tc.root)
+			assert.Equal(t, tc.expect, tc.sample.StoreDir)
+		})
+	}
+}
+
 func TestConfig_Validate(t *testing.T) {
 	appSample := APP{Apps: []*App{{Name: "app1"}, {Name: "app2"}}}
 	dbSample := DB{Databases: []*Database{

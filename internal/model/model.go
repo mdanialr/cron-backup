@@ -9,8 +9,9 @@ import (
 type (
 	// App detail information about an app/directory to be backed up.
 	App struct {
-		Dir  string `mapstructure:"dir"`
-		Name string `mapstructure:"name"`
+		Dir      string `mapstructure:"dir"`  // target directory that will be archived.
+		Name     string `mapstructure:"name"` // directory name where this backup is stored.
+		StoreDir string `mapstructure:"-"`    // directory where this backup is stored after got archived.
 	}
 	// APP the most outer struct of the config file containing all config info for apps/directories.
 	APP struct {
@@ -47,6 +48,12 @@ type (
 		Err *log.Logger // Err is the logger for error messages
 	}
 )
+
+// SetStoreDir append the given root with the app name without adding any trailing slash then assign it to StoreDir
+// field.
+func (a *App) SetStoreDir(root string) {
+	a.StoreDir = fmt.Sprintf("%s/%s", root, a.Name)
+}
 
 // setType normalize and set the type of the database.
 func (d *Database) setType() error {
