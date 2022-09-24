@@ -1,8 +1,9 @@
-package logger
+package logger_test
 
 import (
 	"testing"
 
+	"github.com/mdanialr/go-cron-backup/pkg/logger"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
 )
@@ -26,7 +27,7 @@ func TestInitInfoLogger(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := InitInfoLogger(tt.sampleConf)
+			_, err := logger.InitInfoLogger(tt.sampleConf)
 
 			switch tt.wantErr {
 			case false:
@@ -57,7 +58,7 @@ func TestInitErrorLogger(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := InitErrorLogger(tt.sampleConf)
+			_, err := logger.InitErrorLogger(tt.sampleConf)
 
 			switch tt.wantErr {
 			case false:
