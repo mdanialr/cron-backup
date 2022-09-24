@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/mdanialr/go-cron-backup/internal/helpers"
 	"github.com/mdanialr/go-cron-backup/internal/model"
 	"github.com/mdanialr/go-cron-backup/internal/port"
+	"github.com/mdanialr/go-cron-backup/pkg/helper"
 )
 
 // NewDBJob create concrete implementation of port.DBJob.
@@ -24,8 +24,8 @@ type dbJob struct {
 }
 
 func (w *dbJob) Dump(db *model.Database) (*bytes.Buffer, error) {
-	defer w.log.Inf.Printf(helpers.LogDone(db.ID, "dumping database"))
-	w.log.Inf.Printf(helpers.LogStart(db.ID, "dumping database"))
+	defer w.log.Inf.Printf(helper.LogDone(db.ID, "dumping database"))
+	w.log.Inf.Printf(helper.LogStart(db.ID, "dumping database"))
 
 	cmdName, cmdArg := "sh", "-c" // for linux and darwin (macOS)
 	if w.os == "windows" {
