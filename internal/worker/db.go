@@ -19,7 +19,7 @@ func DBWorker(wg *sync.WaitGroup, jobs <-chan *model.Database, goos string, log 
 		if err != nil {
 			log.Err.Println(err)
 			wg.Done()
-			return
+			continue
 		}
 
 		// zip the buffer
@@ -29,7 +29,7 @@ func DBWorker(wg *sync.WaitGroup, jobs <-chan *model.Database, goos string, log 
 			log.Err.Println("failed to zip dumped database:", err)
 			log.Inf.Printf(helper.LogDone(db.ID, "zipping"))
 			wg.Done()
-			return
+			continue
 		}
 		log.Inf.Printf(helper.LogDone(db.ID, "zipping"))
 
@@ -41,7 +41,7 @@ func DBWorker(wg *sync.WaitGroup, jobs <-chan *model.Database, goos string, log 
 			log.Err.Println("failed to create file:", err)
 			log.Inf.Printf(helper.LogDone(db.ID, "writing to file"))
 			wg.Done()
-			return
+			continue
 		}
 
 		fl.Write(zipped.Bytes())
