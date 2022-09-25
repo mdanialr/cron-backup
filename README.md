@@ -1,73 +1,66 @@
 # Cronjob App for Backup
-Little app to backup multiple databases and apps/folder/dir with zip archive written in Go.
+CLI for backup multiple databases and apps/folders/directories using zip archive format written in Go.
 
 # Features
 * Backup multiple folder app or dir.
-* Follow and walkthrough `symlink`.
+* Follow and walk-through `symlink`.
 * Backup multiple databases. support __PostgreSQL__, __MariaDB__ & __MySQL__ database.
 * Custom max days to retain old backup before deleted.
 * Backup multiple app and database concurrently at once.
 * Pack the backup using ZIP archive (*deflate*).
-* No root privileges is needed. (*as long as the user running this app has sufficient privileges*).
-* Throttle CPU usage by setting up max worker.
-* ZIP archive without any external dependency (*using Go's __stdlib__* only).
+* No root privileges is needed. (*as long as the user running this app has sufficient privileges which is __read-only__*).
+* Throttle CPU & Memory usage by setting up max worker.
+* ZIP archive without any external dependency (*thanks to Go's __stdlib__*).
 
+# How to Use
+1. Download the binary from [GitHub Releases](https://github.com/mdanialr/webhook/releases)
+2. Create new config file with a filename `app.yml`. __The file name `app.yml`__ is mandatory otherwise
+      [Viper](https://github.com/spf13/viper) will not find it
+3. Extract then run to check if there is any error in config file
+    ```bash
+    tar -xzf cron-backup....tar.gz
+    ./cron-backup
+    ```
+4. Create a cronjob to run this app (__optional__).
+    > Example
+    ```bash
+    @daily cd /path/to/binary/file && ./cron-backup
+    ```
 
-# Installation
-1. Clone the repo.
-```bash
-git clone https://github.com/mdanialr/go-cron-backup.git
+## Example
+Create config file with the filename `app.yml`
+```yaml
+root: /full/path/to/dir # required. root dir for backup, must be full path
+max_days: # default to 6 days
+db:
+  max_days: # default to follow root max_days
+  max_worker: # default to 1
+  databases:
+    - type: { pg/md/my } # pg for postgresql, md for mariadb, my for mysql
+      host: ip_to_server # default to localhost
+      port: db_port in integer # default to 5432, 3306 for pg and mdb or my respectively
+      name: db_name # required. the database name
+      user: db_usr # default to postgres for pg, root for md and my
+      pass: db_pwd # default to postgres for pg, root for md and my
+      backup: db-backup-name # required. unique. directory name for backup this database
+      params: --opt --skip-lock-tables --single-transaction # can only be used for mariadb & mysql (md/my). will be ignored if the type is pg
+    - type: { pg/md/my }
+      docker: container_name # backup a database that's inside a docker container. the following host, port, name, user & pass config should be for the database inside the container
+      host: ip_to_server # default to localhost. should point to database host within the container not where this app is run
+      port: db_port in integer # default to 5432, 3306 for pg and mdb respectively. should point to database port within the container not where this app is run
+      name: db_name # required. the database name inside the container
+      user: db_usr # default to postgres for pg, root for md and my. the username that is used within the container, usually is root
+      pass: db_pwd # default to postgres for pg, root for md and my. the password that is used within the container, usually is also root
+      backup: db-another-name # required. unique. directory name for backup this database inside the container
+app:
+  max_days: # default to follow root max_days
+  max_worker: 2 # default to 1
+  apps:
+    - dir: /full/path/to/app/dir # required. the app directory that will be archived
+      name: some-app-name # required. unique. directory name for backup this app/directory
+    - dir: /full/path/to/another/app/dir
+      name: some-another-app-name
 ```
-> assuming that you are in the root path of the repo.
-2. Get dependencies.
-```bash
-go mod tidy
-```
-
-3. Create new config file.
-```bash
-cp config.yaml.example config.yaml
-```
-
-4. Fill in the config.yaml file as needed.
-
-5. Build the project.
-```bash
-go build -o build/go-cron-backup main.go
-```
-
-6. Run a test to check if the app is working properly.
-```bash
-./build/go-cron-backup -test -d
-```
-> If there is no error message in terminal then go to next step.
-
-7. Run the app.
-```bash
-./build/go-cron-backup
-```
-
-8. (optional) Create a cronjob to run this app.
-> Example
-```bash
-@daily cd /path/to/repo/go-cron-backup && ./build/go-cron-backup
-```
-
-# Arguments
-* `-test` : test the app. (*will only delete the zip files that created by this test*).
-* `-d` : **delete** backup and log folder recursively including every files in that directoris. so be careful with this argument. (**_never use this argument when you have already run the app in production, otherwise this will delete all of your backup files in that directory_**)
-* `-no-app` : exclude app from this testing.
-* `-no-db` : exclude db from this testing.
-* `-sample` : the number of sample to be tested for both app and db.
-* `-sam-app` : specifically set the number of sample for app.
-* `-sam-db` : specifically set the number of sample for db.
-
-
-# Notes
-* `-sample`, `-sam-app` & `-sam-db` default value is 1 if not specified or overridden.
-* Tested in linux. since this app only uses stdlib then this should also work with any other golang supported platform.
-* See log file to check if there are some errors or successful backup. (in **go-cron-backup--log**)
-* Run this app when you are in the root path of the repo, otherwise you will see error regarding the config file is not found.
 
 # License
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE "LICENSE") file for details.
