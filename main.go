@@ -30,6 +30,12 @@ func main() {
 		log.Fatalln("failed to validate config file:", err)
 	}
 
+	// make sure log dir is already exist
+	if err = os.MkdirAll(conf.GetString("log"), 0770); err != nil {
+		log.Fatalln("failed to create log dir:", err)
+		return
+	}
+
 	infLog, err := logger.InitInfoLogger(conf)
 	if err != nil {
 		log.Fatalln("failed to init info logger:", err)
