@@ -47,6 +47,13 @@ type (
 		Inf *log.Logger // Inf is the logger for info messages
 		Err *log.Logger // Err is the logger for error messages
 	}
+
+	// DeleteWorker bag for deleting old backup that contain information about which directory will be scanned
+	// and retention days threshold for deletion.
+	DeleteWorker struct {
+		Dir    string
+		Retain uint
+	}
 )
 
 // SetStoreDir append the given root with the app name without adding any trailing slash then assign it to StoreDir
