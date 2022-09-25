@@ -21,7 +21,7 @@ func APPWorker(wg *sync.WaitGroup, jobs <-chan *model.App, log *model.Logs) {
 			log.Err.Println("failed to zip directory:", err)
 			log.Inf.Printf(helper.LogDone(app.Name, "zipping"))
 			wg.Done()
-			return
+			continue
 		}
 		log.Inf.Printf(helper.LogDone(app.Name, "zipping"))
 
@@ -33,7 +33,7 @@ func APPWorker(wg *sync.WaitGroup, jobs <-chan *model.App, log *model.Logs) {
 			log.Err.Println("failed to create file:", err)
 			log.Inf.Printf(helper.LogDone(app.Name, "writing to file"))
 			wg.Done()
-			return
+			continue
 		}
 
 		fl.Write(zipped.Bytes())

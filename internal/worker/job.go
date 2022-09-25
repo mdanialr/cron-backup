@@ -3,7 +3,10 @@ package worker
 import (
 	"bytes"
 	"fmt"
+	"math"
+	"os"
 	"os/exec"
+	"time"
 
 	"github.com/mdanialr/go-cron-backup/internal/model"
 	"github.com/mdanialr/go-cron-backup/internal/port"
@@ -45,4 +48,42 @@ func (w *dbJob) Dump(db *model.Database) (*bytes.Buffer, error) {
 	}
 
 	return stdOut, nil
+}
+
+// NewDeleteJob create concrete implementation of port.DeleteJob.
+func NewDeleteJob(log *model.Logs) port.DeleteJob {
+	return &deleteJob{
+		log: log,
+	}
+}
+
+type deleteJob struct {
+	log *model.Logs
+}
+
+// DeleteOldBackup delete old backup based on the given retention days.
+func (a *deleteJob) DeleteOldBackup(dir string, retain uint) error {
+	defer a.log.Inf.Printf(helper.LogDone(dir, "deleting old backup"))
+	a.log.Inf.Printf(helper.LogStart(dir, "deleting old backup"))
+
+	files, err := os.ReadDir(dir)
+	if err != nil {
+		return fmt.Errorf("failed to read dir: %s", err)
+	}
+
+	for _, fl := range files {
+		inf, err := fl.Info()
+		if err != nil {
+			return fmt.Errorf("failed to get file info: %s", err)
+		}
+
+		sinceCreated := math.Round(time.Since(inf.ModTime()).Hours())
+		if uint(sinceCreated) > ((retain * 24) - 1) {
+			if err = os.Remove(fmt.Sprintf("%s/%s", dir, fl.Name())); err != nil {
+				return fmt.Errorf("failed to delete file: %s", err)
+			}
+		}
+	}
+
+	return nil
 }

@@ -30,6 +30,12 @@ func main() {
 		log.Fatalln("failed to validate config file:", err)
 	}
 
+	// make sure log dir is already exist
+	if err = os.MkdirAll(conf.GetString("log"), 0770); err != nil {
+		log.Fatalln("failed to create log dir:", err)
+		return
+	}
+
 	infLog, err := logger.InitInfoLogger(conf)
 	if err != nil {
 		log.Fatalln("failed to init info logger:", err)
@@ -59,6 +65,7 @@ func main() {
 	var wg sync.WaitGroup
 	dbJobChan := make(chan *model.Database)
 	appJobChan := make(chan *model.App)
+	delJobChan := make(chan *model.DeleteWorker)
 
 	// spawn as many workers as many in the config
 	for i := 1; i <= int(svc.DB.MaxWorker); i++ {
@@ -66,6 +73,10 @@ func main() {
 	}
 	for i := 1; i <= int(svc.APP.MaxWorker); i++ {
 		go worker.APPWorker(&wg, appJobChan, logBag)
+	}
+	// spawn workers for deleting old backup files, which is combination of both db and app max worker
+	for i := 1; i <= int(svc.DB.MaxWorker+svc.APP.MaxWorker); i++ {
+		go worker.DeleteWorker(&wg, delJobChan, logBag)
 	}
 
 	logBag.Inf.Println("")
@@ -75,13 +86,20 @@ func main() {
 	for _, job := range svc.DB.Databases {
 		wg.Add(1)
 		dbJobChan <- job
+
+		wg.Add(1)
+		delJobChan <- &model.DeleteWorker{Dir: job.Dir, Retain: svc.DB.MaxDays}
 	}
-	close(dbJobChan)
 	for _, job := range svc.APP.Apps {
 		wg.Add(1)
 		appJobChan <- job
+
+		wg.Add(1)
+		delJobChan <- &model.DeleteWorker{Dir: job.StoreDir, Retain: svc.APP.MaxDays}
 	}
+	close(dbJobChan)
 	close(appJobChan)
+	close(delJobChan)
 
 	wg.Wait()
 	logBag.Inf.Println("-------------- DONE --------------")
